@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,10 +10,10 @@ import TimeClock from "./pages/time-clock";
 import Records from "./pages/records";
 import Staff from "./pages/staff";
 import NotFound from "./pages/NotFound";
+import MedicalExams from "./pages/medical-exams";
 
 const queryClient = new QueryClient();
 
-// Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
   
@@ -71,6 +70,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Records />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medical-exams"
+              element={
+                <ProtectedRoute>
+                  <MedicalExams />
                 </ProtectedRoute>
               }
             />
