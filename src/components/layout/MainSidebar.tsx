@@ -12,13 +12,12 @@ import {
 } from "@/components/ui/sidebar";
 import {
   BarChart3,
-  Calendar,
   ClipboardList,
   Clock,
   Users,
-  Settings,
-  UserCircle,
+  LogOut,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const menuItems = [
   {
@@ -27,19 +26,9 @@ const menuItems = [
     url: "/dashboard",
   },
   {
-    title: "Patients",
-    icon: UserCircle,
-    url: "/patients",
-  },
-  {
     title: "Staff",
     icon: Users,
     url: "/staff",
-  },
-  {
-    title: "Schedule",
-    icon: Calendar,
-    url: "/schedule",
   },
   {
     title: "Time Clock",
@@ -51,14 +40,16 @@ const menuItems = [
     icon: ClipboardList,
     url: "/records",
   },
-  {
-    title: "Settings",
-    icon: Settings,
-    url: "/settings",
-  },
 ];
 
 export function MainSidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAuthenticated");
+    navigate("/login");
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
@@ -82,6 +73,15 @@ export function MainSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors text-red-600"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Sair</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

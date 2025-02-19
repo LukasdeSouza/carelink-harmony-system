@@ -3,18 +3,27 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
 import Index from "./pages/Index";
 import Dashboard from "./pages/dashboard";
-import Patients from "./pages/patients";
-import Staff from "./pages/staff";
-import Schedule from "./pages/schedule";
 import TimeClock from "./pages/time-clock";
 import Records from "./pages/records";
-import Settings from "./pages/settings";
+import Staff from "./pages/staff";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+// Protected Route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -24,14 +33,47 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/patients" element={<Patients />} />
-            <Route path="/staff" element={<Staff />} />
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/time-clock" element={<TimeClock />} />
-            <Route path="/records" element={<Records />} />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/staff"
+              element={
+                <ProtectedRoute>
+                  <Staff />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-clock"
+              element={
+                <ProtectedRoute>
+                  <TimeClock />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/records"
+              element={
+                <ProtectedRoute>
+                  <Records />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
