@@ -1,3 +1,4 @@
+
 import {
   Sidebar,
   SidebarContent,
@@ -16,6 +17,7 @@ import {
   Users,
   LogOut,
   FileText,
+  UserRound,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -29,6 +31,11 @@ const menuItems = [
     title: "Staff",
     icon: Users,
     url: "/staff",
+  },
+  {
+    title: "Patients",
+    icon: UserRound,
+    url: "/patients",
   },
   {
     title: "Time Clock",

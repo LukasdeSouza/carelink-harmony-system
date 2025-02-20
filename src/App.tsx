@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,8 +10,9 @@ import Dashboard from "./pages/dashboard";
 import TimeClock from "./pages/time-clock";
 import Records from "./pages/records";
 import Staff from "./pages/staff";
-import NotFound from "./pages/NotFound";
+import Patients from "./pages/patients";
 import MedicalExams from "./pages/medical-exams";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +56,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Staff />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patients"
+              element={
+                <ProtectedRoute>
+                  <Patients />
                 </ProtectedRoute>
               }
             />
