@@ -18,37 +18,38 @@ import {
   LogOut,
   FileText,
   UserRound,
+  Stethoscope,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const menuItems = [
   {
-    title: "Dashboard",
+    title: "Painel Principal",
     icon: BarChart3,
     url: "/dashboard",
   },
   {
-    title: "Staff",
+    title: "Enfermeiros",
     icon: Users,
     url: "/staff",
   },
   {
-    title: "Patients",
+    title: "Pacientes",
     icon: UserRound,
     url: "/patients",
   },
   {
-    title: "Time Clock",
+    title: "Ponto Eletrônico",
     icon: Clock,
     url: "/time-clock",
   },
   {
-    title: "Records",
+    title: "Prontuários",
     icon: ClipboardList,
     url: "/records",
   },
   {
-    title: "Medical Exams",
+    title: "Exames Médicos",
     icon: FileText,
     url: "/medical-exams",
   },
@@ -65,11 +66,14 @@ export function MainSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <h2 className="text-lg font-semibold text-primary-700">Care Management</h2>
+        <div className="flex items-center gap-2 text-primary-700">
+          <Stethoscope className="w-6 h-6" />
+          <h2 className="text-lg font-semibold">Care Management</h2>
+        </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-sky-50">
         <SidebarGroup>
-          <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -77,7 +81,7 @@ export function MainSidebar() {
                   <SidebarMenuButton asChild>
                     <a
                       href={item.url}
-                      className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-sky-100 transition-colors"
                     >
                       <item.icon className="w-5 h-5 text-primary-600" />
                       <span>{item.title}</span>
@@ -88,7 +92,7 @@ export function MainSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={handleLogout}
-                  className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors text-red-600"
+                  className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-sky-100 transition-colors text-red-600"
                 >
                   <LogOut className="w-5 h-5" />
                   <span>Sair</span>
