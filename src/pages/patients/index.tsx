@@ -39,6 +39,7 @@ import {
   ExamRequest,
 } from "@/types/medical-record";
 import { AnamnesisForm } from "@/components/patients/AnamnesisForm";
+import { MedicalReportForm } from "@/components/patients/MedicalReportForm";
 
 const Patients = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -89,6 +90,14 @@ const Patients = () => {
     };
 
     setAnamneses([...anamneses, newAnamnesis]);
+  };
+
+  const handleNewMedicalReport = (data: Omit<MedicalReport, "id">) => {
+    const newReport: MedicalReport = {
+      ...data,
+      id: Date.now().toString(),
+    };
+    setMedicalReports([...medicalReports, newReport]);
   };
 
   return (
@@ -217,8 +226,52 @@ const Patients = () => {
                   </TabsContent>
 
                   <TabsContent value="reports" className="space-y-4">
-                    <Button className="w-full">Novo Laudo</Button>
-                    {/* Medical reports list */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="w-full">Novo Laudo</Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Novo Laudo Médico - {selectedPatient?.patientName}</DialogTitle>
+                        </DialogHeader>
+                        <MedicalReportForm
+                          patientId={selectedPatient?.id || ""}
+                          patientName={selectedPatient?.patientName || ""}
+                          onSubmit={(data) => {
+                            handleNewMedicalReport(data);
+                            const closeDialog = document.querySelector('[data-radix-focus-guard]');
+                            if (closeDialog instanceof HTMLElement) {
+                              closeDialog.click();
+                            }
+                          }}
+                          onCancel={() => {
+                            const closeDialog = document.querySelector('[data-radix-focus-guard]');
+                            if (closeDialog instanceof HTMLElement) {
+                              closeDialog.click();
+                            }
+                          }}
+                        />
+                      </DialogContent>
+                    </Dialog>
+
+                    <div className="space-y-4">
+                      {medicalReports
+                        .filter((report) => report.patientId === selectedPatient?.id)
+                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                        .map((report) => (
+                          <Card key={report.id}>
+                            <CardHeader>
+                              <CardTitle>{report.title}</CardTitle>
+                              <CardDescription>
+                                {new Date(report.date).toLocaleDateString()} - Dr(a). {report.doctor} - CRM {report.crm}
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="whitespace-pre-wrap">{report.content}</div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="documents" className="space-y-4">
