@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +38,7 @@ import {
   MedicalCertificate,
   ExamRequest,
 } from "@/types/medical-record";
+import { AnamnesisForm } from "@/components/patients/AnamnesisForm";
 
 const Patients = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -61,6 +61,34 @@ const Patients = () => {
   const handlePrintExamRequest = (examRequest: ExamRequest) => {
     // Implement print logic
     toast.success("Pedido de exame enviado para impressão");
+  };
+
+  const handleNewAnamnesis = (data: any) => {
+    const newAnamnesis: Anamnesis = {
+      id: Date.now().toString(),
+      patientId: selectedPatient!.id,
+      date: new Date().toISOString(),
+      mainComplaint: data.hasPainOrFever === "yes" ? "Dor/Febre" : "Nenhuma queixa principal",
+      currentHistory: `
+        ${data.hasPainOrFever === "yes" ? `Dor/Febre há ${data.painDuration}. Localização: ${data.painLocations}` : ""}
+        Problemas urinários: ${data.hasUrinaryProblems === "yes" ? "Sim" : "Não"}
+        Problemas intestinais: ${data.hasIntestinalProblems === "yes" ? "Sim" : "Não"}
+        Vômitos: ${data.hasVomiting === "yes" ? "Sim" : "Não"}
+        Tonturas/Desmaios: ${data.hasDizzinessOrFainting === "yes" ? "Sim" : "Não"}
+      `.trim(),
+      medications: data.usesContinuousMedication === "yes" ? data.medicationDetails : "Não faz uso de medicação contínua",
+      habits: `
+        Tabagismo: ${data.smoker === "yes" ? "Sim" : "Não"}
+        Álcool: ${data.alcoholUse === "yes" ? "Sim" : "Não"}
+      `.trim(),
+      pastHistory: data.hasSurgeries === "yes" ? data.surgeryDetails : "Sem cirurgias prévias",
+      familyHistory: data.hasHereditaryDiseases === "yes" ? data.hereditaryDiseases : "Sem doenças hereditárias relatadas",
+      socialHistory: "",
+      allergies: "",
+      observations: "",
+    };
+
+    setAnamneses([...anamneses, newAnamnesis]);
   };
 
   return (
@@ -134,8 +162,53 @@ const Patients = () => {
                   </TabsList>
 
                   <TabsContent value="anamnesis" className="space-y-4">
-                    <Button className="w-full">Nova Anamnese</Button>
-                    {/* Anamnesis list */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="w-full">Nova Anamnese</Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Nova Anamnese - {selectedPatient?.patientName}</DialogTitle>
+                        </DialogHeader>
+                        <AnamnesisForm
+                          patientId={selectedPatient?.id || ""}
+                          onSubmit={(data) => {
+                            handleNewAnamnesis(data);
+                            const closeDialog = document.querySelector('[data-radix-focus-guard]');
+                            if (closeDialog instanceof HTMLElement) {
+                              closeDialog.click();
+                            }
+                          }}
+                          onCancel={() => {
+                            const closeDialog = document.querySelector('[data-radix-focus-guard]');
+                            if (closeDialog instanceof HTMLElement) {
+                              closeDialog.click();
+                            }
+                          }}
+                        />
+                      </DialogContent>
+                    </Dialog>
+
+                    <div className="space-y-4">
+                      {anamneses
+                        .filter((anamnesis) => anamnesis.patientId === selectedPatient?.id)
+                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                        .map((anamnesis) => (
+                          <Card key={anamnesis.id}>
+                            <CardHeader>
+                              <CardTitle>Anamnese - {new Date(anamnesis.date).toLocaleDateString()}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                              <p><strong>Queixa Principal:</strong> {anamnesis.mainComplaint}</p>
+                              <p><strong>História Atual:</strong> {anamnesis.currentHistory}</p>
+                              <p><strong>Medicamentos:</strong> {anamnesis.medications}</p>
+                              <p><strong>Hábitos:</strong> {anamnesis.habits}</p>
+                              <p><strong>História Pregressa:</strong> {anamnesis.pastHistory}</p>
+                              <p><strong>História Familiar:</strong> {anamnesis.familyHistory}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="evolution" className="space-y-4">
