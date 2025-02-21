@@ -1,4 +1,3 @@
-
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +19,7 @@ import {
   UserRound,
   Stethoscope,
   PackageSearch,
+  Syringe,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -58,6 +58,11 @@ const menuItems = [
     title: "Estoque",
     icon: PackageSearch,
     url: "/inventory",
+  },
+  {
+    title: "Procedimentos",
+    icon: Syringe,
+    url: "/procedures",
   },
 ];
 

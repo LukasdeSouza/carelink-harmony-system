@@ -15,6 +15,7 @@ import MedicalExams from "./pages/medical-exams";
 import NotFound from "./pages/NotFound";
 import Inventory from "./pages/inventory";
 import InventoryType from "./pages/inventory/[type]";
+import Procedures from "./pages/procedures";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -115,6 +116,14 @@ const App = () => {
                   element={
                     <ProtectedRoute>
                       <InventoryType />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/procedures"
+                  element={
+                    <ProtectedRoute>
+                      <Procedures />
                     </ProtectedRoute>
                   }
                 />

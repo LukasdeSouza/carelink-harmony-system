@@ -26,6 +26,18 @@ import { InventoryItem, InventoryItemType } from "@/types/inventory";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+  type: z.enum(["medicine", "product", "equipment"] as const),
+  name: z.string().min(1, "Nome é obrigatório"),
+  quantity: z.number().min(0, "Quantidade deve ser maior ou igual a 0"),
+  unitPrice: z.number().min(0, "Valor unitário deve ser maior ou igual a 0"),
+  expirationDate: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 interface InventoryItemFormProps {
   onSubmit: (data: Omit<InventoryItem, "id" | "totalPrice" | "lastModifiedBy" | "lastModifiedAt">) => void;
@@ -33,9 +45,10 @@ interface InventoryItemFormProps {
 }
 
 export function InventoryItemForm({ onSubmit, onCancel }: InventoryItemFormProps) {
-  const form = useForm({
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      type: "product" as InventoryItemType,
+      type: "product",
       name: "",
       quantity: 0,
       unitPrice: 0,
@@ -43,7 +56,7 @@ export function InventoryItemForm({ onSubmit, onCancel }: InventoryItemFormProps
     },
   });
 
-  const handleSubmit = (data: any) => {
+  const handleSubmit = (data: FormData) => {
     onSubmit({
       ...data,
       quantity: Number(data.quantity),
@@ -98,7 +111,12 @@ export function InventoryItemForm({ onSubmit, onCancel }: InventoryItemFormProps
             <FormItem>
               <FormLabel>Quantidade</FormLabel>
               <FormControl>
-                <Input {...field} type="number" min="0" />
+                <Input 
+                  type="number" 
+                  min="0"
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -112,7 +130,13 @@ export function InventoryItemForm({ onSubmit, onCancel }: InventoryItemFormProps
             <FormItem>
               <FormLabel>Valor Unitário</FormLabel>
               <FormControl>
-                <Input {...field} type="number" min="0" step="0.01" />
+                <Input 
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -129,7 +153,7 @@ export function InventoryItemForm({ onSubmit, onCancel }: InventoryItemFormProps
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
-                      variant={"outline"}
+                      variant="outline"
                       className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}
                     >
                       {field.value ? (
@@ -145,7 +169,12 @@ export function InventoryItemForm({ onSubmit, onCancel }: InventoryItemFormProps
                   <Calendar
                     mode="single"
                     selected={field.value ? new Date(field.value) : undefined}
-                    onSelect={(date) => field.onChange(date?.toISOString())}
+                    onSelect={(date) => {
+                      if (date) {
+                        field.onChange(date.toISOString());
+                      }
+                    }}
+                    disabled={(date) => date < new Date()}
                     initialFocus
                   />
                 </PopoverContent>
