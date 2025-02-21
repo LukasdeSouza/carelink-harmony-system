@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -14,8 +13,9 @@ import Staff from "./pages/staff";
 import Patients from "./pages/patients";
 import MedicalExams from "./pages/medical-exams";
 import NotFound from "./pages/NotFound";
+import Inventory from "./pages/inventory";
+import InventoryType from "./pages/inventory/[type]";
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -99,6 +99,22 @@ const App = () => {
                   element={
                     <ProtectedRoute>
                       <MedicalExams />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory"
+                  element={
+                    <ProtectedRoute>
+                      <Inventory />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/:type"
+                  element={
+                    <ProtectedRoute>
+                      <InventoryType />
                     </ProtectedRoute>
                   }
                 />
