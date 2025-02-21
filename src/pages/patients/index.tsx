@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,19 +28,14 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Printer } from "lucide-react";
 import {
   Anamnesis,
   Evolution,
-  MedicalReport,
   MedicalCertificate,
   ExamRequest,
 } from "@/types/medical-record";
 import { AnamnesisForm } from "@/components/patients/AnamnesisForm";
-import { MedicalReportForm } from "@/components/patients/MedicalReportForm";
 import { MedicalCertificateForm } from "@/components/patients/MedicalCertificateForm";
 import { ExamRequestForm } from "@/components/patients/ExamRequestForm";
 
@@ -83,14 +79,6 @@ const Patients = () => {
     };
 
     setAnamneses([...anamneses, newAnamnesis]);
-  };
-
-  const handleNewMedicalReport = (data: Omit<MedicalReport, "id">) => {
-    const newReport: MedicalReport = {
-      ...data,
-      id: Date.now().toString(),
-    };
-    setMedicalReports([...medicalReports, newReport]);
   };
 
   const handleNewCertificate = (data: Omit<MedicalCertificate, "id">) => {
@@ -280,55 +268,6 @@ CRM: ${examRequest.crm}
                   <TabsContent value="evolution" className="space-y-4">
                     <Button className="w-full">Nova Evolução</Button>
                     {/* Evolution list */}
-                  </TabsContent>
-
-                  <TabsContent value="reports" className="space-y-4">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button className="w-full">Novo Laudo</Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>Novo Laudo Médico - {selectedPatient?.patientName}</DialogTitle>
-                        </DialogHeader>
-                        <MedicalReportForm
-                          patientId={selectedPatient?.id || ""}
-                          patientName={selectedPatient?.patientName || ""}
-                          onSubmit={(data) => {
-                            handleNewMedicalReport(data);
-                            const closeDialog = document.querySelector('[data-radix-focus-guard]');
-                            if (closeDialog instanceof HTMLElement) {
-                              closeDialog.click();
-                            }
-                          }}
-                          onCancel={() => {
-                            const closeDialog = document.querySelector('[data-radix-focus-guard]');
-                            if (closeDialog instanceof HTMLElement) {
-                              closeDialog.click();
-                            }
-                          }}
-                        />
-                      </DialogContent>
-                    </Dialog>
-
-                    <div className="space-y-4">
-                      {medicalReports
-                        .filter((report) => report.patientId === selectedPatient?.id)
-                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                        .map((report) => (
-                          <Card key={report.id}>
-                            <CardHeader>
-                              <CardTitle>{report.title}</CardTitle>
-                              <CardDescription>
-                                {new Date(report.date).toLocaleDateString()} - Dr(a). {report.doctor} - CRM {report.crm}
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="whitespace-pre-wrap">{report.content}</div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                    </div>
                   </TabsContent>
 
                   <TabsContent value="documents" className="space-y-4">
