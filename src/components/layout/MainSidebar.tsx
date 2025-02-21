@@ -3,8 +3,8 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -19,6 +19,7 @@ import {
   FileText,
   UserRound,
   Stethoscope,
+  PackageSearch,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -52,6 +53,11 @@ const menuItems = [
     title: "Exames Médicos",
     icon: FileText,
     url: "/medical-exams",
+  },
+  {
+    title: "Estoque",
+    icon: PackageSearch,
+    url: "/inventory",
   },
 ];
 
