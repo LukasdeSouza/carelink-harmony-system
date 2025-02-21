@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,18 +30,19 @@ import { toast } from "sonner";
 import { Printer } from "lucide-react";
 import {
   Anamnesis,
-  Evolution,
+  MedicalReport,
   MedicalCertificate,
   ExamRequest,
 } from "@/types/medical-record";
 import { AnamnesisForm } from "@/components/patients/AnamnesisForm";
+import { MedicalReportForm } from "@/components/patients/MedicalReportForm";
 import { MedicalCertificateForm } from "@/components/patients/MedicalCertificateForm";
 import { ExamRequestForm } from "@/components/patients/ExamRequestForm";
 
 const Patients = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [anamneses, setAnamneses] = useState<Anamnesis[]>([]);
-  const [evolutions, setEvolutions] = useState<Evolution[]>([]);
+  const [medicalReports, setMedicalReports] = useState<MedicalReport[]>([]);
   const [certificates, setCertificates] = useState<MedicalCertificate[]>([]);
   const [examRequests, setExamRequests] = useState<ExamRequest[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -79,6 +79,15 @@ const Patients = () => {
     };
 
     setAnamneses([...anamneses, newAnamnesis]);
+  };
+
+  const handleNewMedicalReport = (data: Omit<MedicalReport, "id">) => {
+    const newReport: MedicalReport = {
+      ...data,
+      id: Date.now().toString(),
+    };
+    setMedicalReports([...medicalReports, newReport]);
+    toast.success("Laudo médico gerado com sucesso!");
   };
 
   const handleNewCertificate = (data: Omit<MedicalCertificate, "id">) => {
@@ -209,9 +218,9 @@ CRM: ${examRequest.crm}
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="anamnesis" className="space-y-4">
-                  <TabsList className="grid grid-cols-2 md:grid-cols-3">
+                  <TabsList className="grid grid-cols-3">
                     <TabsTrigger value="anamnesis">Anamnese</TabsTrigger>
-                    <TabsTrigger value="evolution">Evolução</TabsTrigger>
+                    <TabsTrigger value="reports">Laudos</TabsTrigger>
                     <TabsTrigger value="documents">Documentos</TabsTrigger>
                   </TabsList>
 
@@ -265,9 +274,53 @@ CRM: ${examRequest.crm}
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="evolution" className="space-y-4">
-                    <Button className="w-full">Nova Evolução</Button>
-                    {/* Evolution list */}
+                  <TabsContent value="reports" className="space-y-4">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="w-full">Novo Laudo</Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Novo Laudo Médico - {selectedPatient?.patientName}</DialogTitle>
+                        </DialogHeader>
+                        <MedicalReportForm
+                          patientId={selectedPatient?.id || ""}
+                          patientName={selectedPatient?.patientName || ""}
+                          onSubmit={(data) => {
+                            handleNewMedicalReport(data);
+                            const closeDialog = document.querySelector('[data-radix-focus-guard]');
+                            if (closeDialog instanceof HTMLElement) {
+                              closeDialog.click();
+                            }
+                          }}
+                          onCancel={() => {
+                            const closeDialog = document.querySelector('[data-radix-focus-guard]');
+                            if (closeDialog instanceof HTMLElement) {
+                              closeDialog.click();
+                            }
+                          }}
+                        />
+                      </DialogContent>
+                    </Dialog>
+
+                    <div className="space-y-4">
+                      {medicalReports
+                        .filter((report) => report.patientId === selectedPatient?.id)
+                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                        .map((report) => (
+                          <Card key={report.id}>
+                            <CardHeader>
+                              <CardTitle>{report.title}</CardTitle>
+                              <CardDescription>
+                                {new Date(report.date).toLocaleDateString()} - Dr(a). {report.doctor} - CRM {report.crm}
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="whitespace-pre-wrap">{report.content}</div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="documents" className="space-y-4">
