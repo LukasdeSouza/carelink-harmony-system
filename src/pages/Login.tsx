@@ -19,7 +19,7 @@ const Login = () => {
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/dashboard");
+        navigate("/flow-selection");
       }
     });
 
@@ -28,7 +28,7 @@ const Login = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        navigate("/dashboard");
+        navigate("/flow-selection");
       }
     });
 
@@ -50,7 +50,7 @@ const Login = () => {
       }
 
       toast.success("Login realizado com sucesso!");
-      navigate("/dashboard");
+      navigate("/flow-selection");
     } catch (error: any) {
       toast.error(error.message || "Erro ao fazer login");
     } finally {

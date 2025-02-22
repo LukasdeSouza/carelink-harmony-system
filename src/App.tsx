@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import Inventory from "./pages/inventory";
 import InventoryType from "./pages/inventory/[type]";
 import Procedures from "./pages/procedures";
+import FlowSelection from "./pages/flow-selection";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,7 +63,8 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+      <Route path="/" element={<ProtectedRoute><FlowSelection /></ProtectedRoute>} />
+      <Route path="/flow-selection" element={<ProtectedRoute><FlowSelection /></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/staff" element={<ProtectedRoute><Staff /></ProtectedRoute>} />
       <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
