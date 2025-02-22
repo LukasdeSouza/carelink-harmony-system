@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { FlowProvider } from "./contexts/FlowContext";
 import Login from "./pages/Login";
 import Index from "./pages/Index";
 import Dashboard from "./pages/dashboard";
@@ -51,11 +52,13 @@ const App = () => {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <div className="min-h-screen bg-background font-inter">
-          <Toaster />
-          <Sonner />
-          <AppRoutes />
-        </div>
+        <FlowProvider>
+          <div className="min-h-screen bg-background font-inter">
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </div>
+        </FlowProvider>
       </QueryClientProvider>
     </BrowserRouter>
   );

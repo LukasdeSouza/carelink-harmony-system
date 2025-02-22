@@ -1,3 +1,4 @@
+
 import {
   Sidebar,
   SidebarContent,
@@ -20,10 +21,14 @@ import {
   Stethoscope,
   PackageSearch,
   Syringe,
+  Building2,
+  Receipt,
+  CalendarRange,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useFlow } from "@/contexts/FlowContext";
 
-const menuItems = [
+const clinicalMenuItems = [
   {
     title: "Painel Principal",
     icon: BarChart3,
@@ -38,11 +43,6 @@ const menuItems = [
     title: "Pacientes",
     icon: UserRound,
     url: "/patients",
-  },
-  {
-    title: "Ponto Eletrônico",
-    icon: Clock,
-    url: "/time-clock",
   },
   {
     title: "Prontuários",
@@ -66,13 +66,45 @@ const menuItems = [
   },
 ];
 
+const administrativeMenuItems = [
+  {
+    title: "Painel Administrativo",
+    icon: Building2,
+    url: "/dashboard",
+  },
+  {
+    title: "Ponto Eletrônico",
+    icon: Clock,
+    url: "/time-clock",
+  },
+  {
+    title: "Financeiro",
+    icon: Receipt,
+    url: "/financial",
+  },
+  {
+    title: "Agenda",
+    icon: CalendarRange,
+    url: "/schedule",
+  },
+];
+
 export function MainSidebar() {
   const navigate = useNavigate();
+  const { selectedFlow, setSelectedFlow } = useFlow();
 
   const handleLogout = () => {
+    setSelectedFlow(null);
     localStorage.removeItem("isAuthenticated");
     navigate("/login");
   };
+
+  const handleChangeFlow = () => {
+    setSelectedFlow(null);
+    navigate("/flow-selection");
+  };
+
+  const menuItems = selectedFlow === 'clinical' ? clinicalMenuItems : administrativeMenuItems;
 
   return (
     <Sidebar>
@@ -100,6 +132,15 @@ export function MainSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={handleChangeFlow}
+                  className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-sky-100 transition-colors"
+                >
+                  <Building2 className="w-5 h-5 text-primary-600" />
+                  <span>Trocar Sistema</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={handleLogout}

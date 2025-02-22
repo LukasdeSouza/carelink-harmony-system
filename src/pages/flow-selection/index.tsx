@@ -2,9 +2,16 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Stethoscope, LineChart } from "lucide-react";
+import { useFlow } from "@/contexts/FlowContext";
 
 const FlowSelection = () => {
   const navigate = useNavigate();
+  const { setSelectedFlow } = useFlow();
+
+  const handleFlowSelection = (flow: 'clinical' | 'administrative') => {
+    setSelectedFlow(flow);
+    navigate(flow === 'clinical' ? "/dashboard" : "/time-clock");
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -17,7 +24,7 @@ const FlowSelection = () => {
         <div className="grid md:grid-cols-2 gap-6">
           <Card 
             className="cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => handleFlowSelection('clinical')}
           >
             <CardHeader className="text-center">
               <div className="mx-auto bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
@@ -32,7 +39,7 @@ const FlowSelection = () => {
 
           <Card 
             className="cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => navigate("/time-clock")}
+            onClick={() => handleFlowSelection('administrative')}
           >
             <CardHeader className="text-center">
               <div className="mx-auto bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
