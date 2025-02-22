@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { InventoryItemForm } from "@/components/inventory/InventoryItemForm";
+import InventoryItemForm from "@/components/inventory/InventoryItemForm";
 import { InventoryList } from "@/components/inventory/InventoryList";
 import { InventoryItem, InventoryItemType, InventoryLog } from "@/types/inventory";
 import { useState } from "react";
