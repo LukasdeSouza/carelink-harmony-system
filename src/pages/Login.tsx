@@ -6,8 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,42 +13,18 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/flow-selection");
-      }
-    });
-
-    // Listen for auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        navigate("/flow-selection");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        throw error;
+      // Simulate login - replace with your authentication logic
+      if (email && password) {
+        toast.success("Login realizado com sucesso!");
+        navigate("/flow-selection");
+      } else {
+        throw new Error("Por favor, preencha todos os campos");
       }
-
-      toast.success("Login realizado com sucesso!");
-      navigate("/flow-selection");
     } catch (error: any) {
       toast.error(error.message || "Erro ao fazer login");
     } finally {
@@ -63,16 +37,12 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) {
-        throw error;
+      // Simulate signup - replace with your signup logic
+      if (email && password) {
+        toast.success("Cadastro realizado com sucesso!");
+      } else {
+        throw new Error("Por favor, preencha todos os campos");
       }
-
-      toast.success("Cadastro realizado com sucesso! Por favor, verifique seu email.");
     } catch (error: any) {
       toast.error(error.message || "Erro ao criar conta");
     } finally {

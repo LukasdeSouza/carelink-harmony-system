@@ -2,9 +2,8 @@
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import Login from "./pages/Login";
 import Index from "./pages/Index";
 import Dashboard from "./pages/dashboard";
@@ -28,51 +27,21 @@ const queryClient = new QueryClient({
   },
 });
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-
-  React.useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
-      setIsLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (isLoading) {
-    return <div className="flex h-screen items-center justify-center">Carregando...</div>;
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-};
-
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={<ProtectedRoute><FlowSelection /></ProtectedRoute>} />
-      <Route path="/flow-selection" element={<ProtectedRoute><FlowSelection /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/staff" element={<ProtectedRoute><Staff /></ProtectedRoute>} />
-      <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
-      <Route path="/time-clock" element={<ProtectedRoute><TimeClock /></ProtectedRoute>} />
-      <Route path="/records" element={<ProtectedRoute><Records /></ProtectedRoute>} />
-      <Route path="/medical-exams" element={<ProtectedRoute><MedicalExams /></ProtectedRoute>} />
-      <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
-      <Route path="/inventory/:type" element={<ProtectedRoute><InventoryType /></ProtectedRoute>} />
-      <Route path="/procedures" element={<ProtectedRoute><Procedures /></ProtectedRoute>} />
+      <Route path="/" element={<FlowSelection />} />
+      <Route path="/flow-selection" element={<FlowSelection />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/staff" element={<Staff />} />
+      <Route path="/patients" element={<Patients />} />
+      <Route path="/time-clock" element={<TimeClock />} />
+      <Route path="/records" element={<Records />} />
+      <Route path="/medical-exams" element={<MedicalExams />} />
+      <Route path="/inventory" element={<Inventory />} />
+      <Route path="/inventory/:type" element={<InventoryType />} />
+      <Route path="/procedures" element={<Procedures />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
