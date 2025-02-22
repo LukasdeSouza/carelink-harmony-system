@@ -2,7 +2,6 @@
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,13 +82,11 @@ const App = () => {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <div className="min-h-screen bg-background font-inter">
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </div>
-        </TooltipProvider>
+        <div className="min-h-screen bg-background font-inter">
+          <Toaster />
+          <Sonner />
+          <AppRoutes />
+        </div>
       </QueryClientProvider>
     </BrowserRouter>
   );
