@@ -58,104 +58,38 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AppRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/staff" element={<ProtectedRoute><Staff /></ProtectedRoute>} />
+      <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
+      <Route path="/time-clock" element={<ProtectedRoute><TimeClock /></ProtectedRoute>} />
+      <Route path="/records" element={<ProtectedRoute><Records /></ProtectedRoute>} />
+      <Route path="/medical-exams" element={<ProtectedRoute><MedicalExams /></ProtectedRoute>} />
+      <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+      <Route path="/inventory/:type" element={<ProtectedRoute><InventoryType /></ProtectedRoute>} />
+      <Route path="/procedures" element={<ProtectedRoute><Procedures /></ProtectedRoute>} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <React.StrictMode>
-        <BrowserRouter>
-          <TooltipProvider>
-            <div className="min-h-screen bg-background font-inter">
-              <Toaster />
-              <Sonner />
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Index />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/staff"
-                  element={
-                    <ProtectedRoute>
-                      <Staff />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/patients"
-                  element={
-                    <ProtectedRoute>
-                      <Patients />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/time-clock"
-                  element={
-                    <ProtectedRoute>
-                      <TimeClock />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/records"
-                  element={
-                    <ProtectedRoute>
-                      <Records />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/medical-exams"
-                  element={
-                    <ProtectedRoute>
-                      <MedicalExams />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/inventory"
-                  element={
-                    <ProtectedRoute>
-                      <Inventory />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/inventory/:type"
-                  element={
-                    <ProtectedRoute>
-                      <InventoryType />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/procedures"
-                  element={
-                    <ProtectedRoute>
-                      <Procedures />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
-          </TooltipProvider>
-        </BrowserRouter>
-      </React.StrictMode>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <div className="min-h-screen bg-background font-inter">
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </div>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 };
 
