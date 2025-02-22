@@ -1,196 +1,107 @@
 
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { InventoryItem, InventoryItemType } from "@/types/inventory";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-const formSchema = z.object({
-  type: z.enum(["medicine", "product", "equipment"] as const),
-  name: z.string().min(1, "Nome é obrigatório"),
-  quantity: z.number().min(0, "Quantidade deve ser maior ou igual a 0"),
-  unitPrice: z.number().min(0, "Valor unitário deve ser maior ou igual a 0"),
-  expirationDate: z.string().optional(),
-});
-
-type FormData = z.infer<typeof formSchema>;
+} from '@/components/ui/select';
+import type { InventoryItem } from '@/types/inventory';
 
 interface InventoryItemFormProps {
-  onSubmit: (data: Omit<InventoryItem, "id" | "totalPrice" | "lastModifiedBy" | "lastModifiedAt">) => void;
-  onCancel: () => void;
+  onSubmit: (data: Omit<InventoryItem, 'id' | 'totalPrice' | 'lastModifiedBy' | 'lastModifiedAt'>) => void;
+  initialData?: Partial<InventoryItem>;
 }
 
-export function InventoryItemForm({ onSubmit, onCancel }: InventoryItemFormProps) {
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+const InventoryItemForm: React.FC<InventoryItemFormProps> = ({ onSubmit, initialData }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
-      type: "product",
-      name: "",
-      quantity: 0,
-      unitPrice: 0,
-      expirationDate: "",
-    },
+      name: initialData?.name || '',
+      type: initialData?.type || 'product',
+      quantity: initialData?.quantity || 0,
+      unitPrice: initialData?.unitPrice || 0,
+      expirationDate: initialData?.expirationDate || ''
+    }
   });
 
-  const handleSubmit = (data: FormData) => {
-    onSubmit({
-      ...data,
+  const handleFormSubmit = (data: any) => {
+    const formData = {
+      name: data.name,
+      type: data.type as 'medicine' | 'product' | 'equipment',
       quantity: Number(data.quantity),
       unitPrice: Number(data.unitPrice),
-    });
+      expirationDate: data.expirationDate || undefined
+    };
+    
+    onSubmit(formData);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="medicine">Medicamento</SelectItem>
-                  <SelectItem value="product">Produto</SelectItem>
-                  <SelectItem value="equipment">Material/EPI</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Nome do Item</Label>
+        <Input 
+          id="name" 
+          {...register('name', { required: true })}
+          placeholder="Nome do item"
         />
+      </div>
 
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Nome do item" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div className="space-y-2">
+        <Label htmlFor="type">Tipo</Label>
+        <Select 
+          {...register('type', { required: true })}
+          defaultValue="product"
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="medicine">Medicamento</SelectItem>
+            <SelectItem value="product">Produto</SelectItem>
+            <SelectItem value="equipment">Equipamento</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="quantity">Quantidade</Label>
+        <Input 
+          id="quantity" 
+          type="number"
+          {...register('quantity', { required: true, min: 0 })}
         />
+      </div>
 
-        <FormField
-          control={form.control}
-          name="quantity"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quantidade</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  min="0"
-                  value={field.value}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div className="space-y-2">
+        <Label htmlFor="unitPrice">Preço Unitário</Label>
+        <Input 
+          id="unitPrice" 
+          type="number"
+          step="0.01"
+          {...register('unitPrice', { required: true, min: 0 })}
         />
+      </div>
 
-        <FormField
-          control={form.control}
-          name="unitPrice"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor Unitário</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={field.value}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div className="space-y-2">
+        <Label htmlFor="expirationDate">Data de Validade (opcional)</Label>
+        <Input 
+          id="expirationDate" 
+          type="date"
+          {...register('expirationDate')}
         />
+      </div>
 
-        <FormField
-          control={form.control}
-          name="expirationDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Data de Validade</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}
-                    >
-                      {field.value ? (
-                        format(new Date(field.value), "dd/MM/yyyy")
-                      ) : (
-                        <span>Selecione uma data</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value ? new Date(field.value) : undefined}
-                    onSelect={(date) => {
-                      if (date) {
-                        field.onChange(date.toISOString());
-                      }
-                    }}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
-          <Button type="submit">Salvar</Button>
-        </div>
-      </form>
-    </Form>
+      <Button type="submit" className="w-full">
+        Salvar Item
+      </Button>
+    </form>
   );
-}
+};
+
+export default InventoryItemForm;
