@@ -5,16 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
-import { } from "../lib/utils"
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Stethoscope } from "lucide-react";
+import { useFlow } from "@/contexts/FlowContext"; // Updated import path
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { setUserRole } = useFlow();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +27,7 @@ const Login = () => {
         if (result.error) {
           toast.error(result.error.message);
         } else {
-          console.log('result', result)
+          setUserRole('admin');
           localStorage.setItem("drfacil.auth.token", result.data?.session.access_token);
           toast.success("Login realizado com sucesso!");
           navigate("/flow-selection");
@@ -48,7 +49,7 @@ const Login = () => {
     try {
       if (email && password) {
         let result = await supabase.auth.signUp({ email, password });
-        if(result.data.user.aud === 'authenticated') {
+        if(result.data.user?.aud === 'authenticated') {
           toast.success("Cadastro realizado com sucesso! Faça Login para acessar o sistema");
         }
       } else {
@@ -65,7 +66,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
-          <div className="flex items-center gap-2 text-primary-700">
+          <div className="flex items-center gap-2 text-primary-700 justify-center">
             <Stethoscope className="w-6 h-6" />
             <CardTitle className="text-2xl font-bold">Dr. Fácil</CardTitle>
           </div>
@@ -85,7 +86,17 @@ const Login = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password">Senha</Label>
+                <Button
+                  variant="link"
+                  className="px-0 font-normal"
+                  type="button"
+                  onClick={() => navigate("/reset-password")}
+                >
+                  Esqueceu a senha?
+                </Button>
+              </div>
               <Input
                 id="password"
                 type="password"

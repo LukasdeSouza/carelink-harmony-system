@@ -28,75 +28,146 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useFlow } from "@/contexts/FlowContext";
 
-const clinicalMenuItems = [
-  {
-    title: "Painel Principal",
-    icon: BarChart3,
-    url: "/dashboard",
+const menuItemsByRole = {
+  admin: {
+    clinical: [
+      {
+        title: "Painel Principal",
+        icon: BarChart3,
+        url: "/dashboard",
+      },
+      {
+        title: "Enfermeiros",
+        icon: Users,
+        url: "/staff",
+      },
+      {
+        title: "Pacientes",
+        icon: UserRound,
+        url: "/patients",
+      },
+      {
+        title: "Prontuários",
+        icon: ClipboardList,
+        url: "/records",
+      },
+      {
+        title: "Exames Médicos",
+        icon: FileText,
+        url: "/medical-exams",
+      },
+      {
+        title: "Estoque",
+        icon: PackageSearch,
+        url: "/inventory",
+      },
+      {
+        title: "Procedimentos",
+        icon: Syringe,
+        url: "/procedures",
+      },
+    ],
+    administrative: [
+      {
+        title: "Painel Administrativo",
+        icon: Building2,
+        url: "/dashboard",
+      },
+      {
+        title: "Ponto Eletrônico",
+        icon: Clock,
+        url: "/time-clock",
+      },
+      {
+        title: "Financeiro",
+        icon: Receipt,
+        url: "/financial",
+      },
+      {
+        title: "Agenda",
+        icon: CalendarRange,
+        url: "/schedule",
+      },
+    ],
   },
-  {
-    title: "Enfermeiros",
-    icon: Users,
-    url: "/staff",
+  nurse: {
+    clinical: [
+      {
+        title: "Painel Principal",
+        icon: BarChart3,
+        url: "/dashboard",
+      },
+      {
+        title: "Pacientes",
+        icon: UserRound,
+        url: "/patients",
+      },
+      {
+        title: "Prontuários",
+        icon: ClipboardList,
+        url: "/records",
+      },
+      {
+        title: "Exames Médicos",
+        icon: FileText,
+        url: "/medical-exams",
+      },
+      {
+        title: "Procedimentos",
+        icon: Syringe,
+        url: "/procedures",
+      },
+    ],
+    administrative: [
+      {
+        title: "Ponto Eletrônico",
+        icon: Clock,
+        url: "/time-clock",
+      },
+      {
+        title: "Agenda",
+        icon: CalendarRange,
+        url: "/schedule",
+      },
+    ],
   },
-  {
-    title: "Pacientes",
-    icon: UserRound,
-    url: "/patients",
+  receptionist: {
+    clinical: [
+      {
+        title: "Pacientes",
+        icon: UserRound,
+        url: "/patients",
+      },
+      {
+        title: "Agenda",
+        icon: CalendarRange,
+        url: "/schedule",
+      },
+    ],
+    administrative: [
+      {
+        title: "Ponto Eletrônico",
+        icon: Clock,
+        url: "/time-clock",
+      },
+      {
+        title: "Agenda",
+        icon: CalendarRange,
+        url: "/schedule",
+      },
+    ],
   },
-  {
-    title: "Prontuários",
-    icon: ClipboardList,
-    url: "/records",
-  },
-  {
-    title: "Exames Médicos",
-    icon: FileText,
-    url: "/medical-exams",
-  },
-  {
-    title: "Estoque",
-    icon: PackageSearch,
-    url: "/inventory",
-  },
-  {
-    title: "Procedimentos",
-    icon: Syringe,
-    url: "/procedures",
-  },
-];
-
-const administrativeMenuItems = [
-  {
-    title: "Painel Administrativo",
-    icon: Building2,
-    url: "/dashboard",
-  },
-  {
-    title: "Ponto Eletrônico",
-    icon: Clock,
-    url: "/time-clock",
-  },
-  {
-    title: "Financeiro",
-    icon: Receipt,
-    url: "/financial",
-  },
-  {
-    title: "Agenda",
-    icon: CalendarRange,
-    url: "/schedule",
-  },
-];
+};
 
 export function MainSidebar() {
   const navigate = useNavigate();
-  const { selectedFlow, setSelectedFlow } = useFlow();
-  console.log('selectedFlow', selectedFlow)
+  const { selectedFlow, setSelectedFlow, userRole } = useFlow();
 
   const handleLogout = () => {
     setSelectedFlow(null);
     localStorage.removeItem("drfacil.auth.token");
+    localStorage.removeItem("drfacil.flow");
+    localStorage.removeItem("drfacil.user.role");
     navigate("/login");
   };
 
@@ -105,7 +176,9 @@ export function MainSidebar() {
     navigate("/flow-selection");
   };
 
-  const menuItems = selectedFlow === 'clinical' ? clinicalMenuItems : administrativeMenuItems;
+  if (!userRole || !selectedFlow) return null;
+
+  const menuItems = menuItemsByRole[userRole][selectedFlow];
 
 
   return (
