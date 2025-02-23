@@ -8,14 +8,12 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Stethoscope } from "lucide-react";
-import { useFlow } from "@/contexts/FlowContext"; // Updated import path
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { setUserRole } = useFlow();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,12 +21,10 @@ const Login = () => {
 
     try {
       if (email && password) {
-        let result = await supabase.auth.signInWithPassword({ email, password });
-        if (result.error) {
-          toast.error(result.error.message);
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          toast.error(error.message);
         } else {
-          setUserRole('admin');
-          localStorage.setItem("drfacil.auth.token", result.data?.session.access_token);
           toast.success("Login realizado com sucesso!");
           navigate("/flow-selection");
         }
@@ -48,8 +44,10 @@ const Login = () => {
 
     try {
       if (email && password) {
-        let result = await supabase.auth.signUp({ email, password });
-        if(result.data.user?.aud === 'authenticated') {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          toast.error(error.message);
+        } else {
           toast.success("Cadastro realizado com sucesso! Faça Login para acessar o sistema");
         }
       } else {

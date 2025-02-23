@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 type FlowType = 'clinical' | 'administrative' | null;
 type UserRole = 'admin' | 'nurse' | 'receptionist';
@@ -19,11 +20,34 @@ export function FlowProvider({ children }: { children: React.ReactNode }) {
     return saved ? (saved as FlowType) : null;
   });
 
-  const [userRole, setUserRole] = useState<UserRole | null>(() => {
-    const saved = localStorage.getItem('drfacil.user.role');
-    return saved ? (saved as UserRole) : null;
-  });
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
 
+  // Monitora o estado da autenticação
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
+        // Por enquanto, definimos como admin. Você deve adaptar isso para pegar o papel real do usuário
+        setUserRole('admin');
+      } else if (event === 'SIGNED_OUT') {
+        setUserRole(null);
+        setSelectedFlow(null);
+        localStorage.removeItem('drfacil.flow');
+      }
+    });
+
+    // Verifica o estado inicial da autenticação
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setUserRole('admin');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Persiste apenas o flow no localStorage
   useEffect(() => {
     if (selectedFlow) {
       localStorage.setItem('drfacil.flow', selectedFlow);
@@ -31,14 +55,6 @@ export function FlowProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('drfacil.flow');
     }
   }, [selectedFlow]);
-
-  useEffect(() => {
-    if (userRole) {
-      localStorage.setItem('drfacil.user.role', userRole);
-    } else {
-      localStorage.removeItem('drfacil.user.role');
-    }
-  }, [userRole]);
 
   return (
     <FlowContext.Provider value={{ selectedFlow, setSelectedFlow, userRole, setUserRole }}>
