@@ -5,7 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
+import { } from "../lib/utils"
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Stethoscope } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -18,10 +21,16 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Simulate login - replace with your authentication logic
       if (email && password) {
-        toast.success("Login realizado com sucesso!");
-        navigate("/flow-selection");
+        let result = await supabase.auth.signInWithPassword({ email, password });
+        if (result.error) {
+          toast.error(result.error.message);
+        } else {
+          console.log('result', result)
+          localStorage.setItem("drfacil.auth.token", result.data?.session.access_token);
+          toast.success("Login realizado com sucesso!");
+          navigate("/flow-selection");
+        }
       } else {
         throw new Error("Por favor, preencha todos os campos");
       }
@@ -37,9 +46,11 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Simulate signup - replace with your signup logic
       if (email && password) {
-        toast.success("Cadastro realizado com sucesso!");
+        let result = await supabase.auth.signUp({ email, password });
+        if(result.data.user.aud === 'authenticated') {
+          toast.success("Cadastro realizado com sucesso! Faça Login para acessar o sistema");
+        }
       } else {
         throw new Error("Por favor, preencha todos os campos");
       }
@@ -54,7 +65,10 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl font-bold">Care Management System</CardTitle>
+          <div className="flex items-center gap-2 text-primary-700">
+            <Stethoscope className="w-6 h-6" />
+            <CardTitle className="text-2xl font-bold">Dr. Fácil</CardTitle>
+          </div>
           <p className="text-gray-500">Entre com suas credenciais para acessar o sistema</p>
         </CardHeader>
         <CardContent>
@@ -84,9 +98,9 @@ const Login = () => {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Carregando..." : "Entrar"}
               </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 className="w-full"
                 onClick={handleSignUp}
                 disabled={isLoading}
