@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -21,6 +20,7 @@ import Inventory from "./pages/inventory";
 import InventoryType from "./pages/inventory/[type]";
 import Procedures from "./pages/procedures";
 import FlowSelection from "./pages/flow-selection";
+import AIAssistant from "./pages/ai-assistant";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,6 +50,11 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={
         <PrivateRoute>
           <Dashboard />
+        </PrivateRoute>
+      } />
+      <Route path="/ai-assistant" element={
+        <PrivateRoute>
+          <AIAssistant />
         </PrivateRoute>
       } />
       <Route path="/staff" element={

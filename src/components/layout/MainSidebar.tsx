@@ -24,6 +24,7 @@ import {
   Building2,
   Receipt,
   CalendarRange,
+  Bot,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFlow } from "@/contexts/FlowContext";
@@ -72,6 +73,11 @@ const menuItemsByRole = {
         title: "Painel Administrativo",
         icon: Building2,
         url: "/dashboard",
+      },
+      {
+        title: "IA Dr.Fácil",
+        icon: Bot,
+        url: "/ai-assistant",
       },
       {
         title: "Ponto Eletrônico",
