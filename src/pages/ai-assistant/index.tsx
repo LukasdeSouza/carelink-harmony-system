@@ -54,7 +54,10 @@ export default function AIAssistant() {
         <Bot className="w-8 h-8" />
         <h1 className="text-2xl font-bold">IA Dr.Fácil</h1>
       </div>
-      
+      <a href="/" className="text-blue-500 hover:text-blue-700 underline text-sm">
+        {"< voltar"}
+      </a>
+
       <div className="bg-white rounded-lg shadow-sm border p-4 min-h-[600px] flex flex-col">
         <div className="flex-1 overflow-y-auto space-y-4 mb-4">
           {messages.length === 0 ? (
