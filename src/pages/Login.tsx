@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Stethoscope } from "lucide-react";
-import { useFlow } from "@/hooks/useFlow";
+import { useFlow } from "@/contexts/FlowContext"; // Updated import path
 
 const Login = () => {
   const [email, setEmail] = useState("");
