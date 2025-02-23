@@ -92,10 +92,11 @@ const administrativeMenuItems = [
 export function MainSidebar() {
   const navigate = useNavigate();
   const { selectedFlow, setSelectedFlow } = useFlow();
+  console.log('selectedFlow', selectedFlow)
 
   const handleLogout = () => {
     setSelectedFlow(null);
-    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("drfacil.auth.token");
     navigate("/login");
   };
 
@@ -105,6 +106,7 @@ export function MainSidebar() {
   };
 
   const menuItems = selectedFlow === 'clinical' ? clinicalMenuItems : administrativeMenuItems;
+
 
   return (
     <Sidebar>
