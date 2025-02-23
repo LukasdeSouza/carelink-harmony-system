@@ -186,7 +186,7 @@ export function MainSidebar() {
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2 text-primary-700">
           <Stethoscope className="w-6 h-6" />
-          <h2 className="text-lg font-semibold">Care Management</h2>
+          <h2 className="text-lg font-semibold">Dr. Fácil</h2>
         </div>
       </SidebarHeader>
       <SidebarContent className="bg-sky-50">
