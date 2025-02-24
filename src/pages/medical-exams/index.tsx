@@ -1,10 +1,23 @@
+
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { FileUp, Loader2 } from "lucide-react";
+import { Patient } from "@/types/staff";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { format } from "date-fns";
+import { generateRandomPassword, generateUsername } from "@/utils/auth";
 
 interface ExamFile {
   id: string;
@@ -21,25 +34,142 @@ interface ExamFile {
 
 const MedicalExams = () => {
   const [examFiles, setExamFiles] = useState<ExamFile[]>([]);
-  const [formData, setFormData] = useState({
-    patientDocument: "",
-    patientName: "",
-    patientPhone: "",
-    patientAddress: "",
-    parentName: "",
-    parentEmail: "",
-    parentPhone: "",
-  });
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Add file handling logic here
-    toast.success("Exame enviado com sucesso!");
+  const loadPatients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("pacientes")
+        .select("*")
+        .order("nome");
+
+      if (error) throw error;
+      setPatients(data || []);
+    } catch (error: any) {
+      toast.error("Erro ao carregar pacientes: " + error.message);
+    }
   };
 
-  const handleWhatsAppClick = (phone: string) => {
-    const formattedPhone = phone.replace(/\D/g, "");
-    window.open(`https://wa.me/${formattedPhone}`, "_blank");
+  useEffect(() => {
+    loadPatients();
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const createUserAccount = async (patient: Patient) => {
+    try {
+      const email = patient.email;
+      const password = generateRandomPassword();
+      const username = generateUsername(patient.nome);
+
+      // Criar usuário no auth do Supabase
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: patient.nome,
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      // Criar perfil na tabela profiles
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          id: authData.user?.id,
+          document: patient.documento,
+          role: "patient",
+        },
+      ]);
+
+      if (profileError) throw profileError;
+
+      // Enviar credenciais por email (você precisará implementar isso)
+      toast.success(
+        `Credenciais criadas - Email: ${email}, Senha: ${password}. Guarde essas informações.`
+      );
+
+      return { email, password };
+    } catch (error: any) {
+      toast.error("Erro ao criar conta do paciente: " + error.message);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedFile || !selectedPatient) {
+      toast.error("Selecione um arquivo e um paciente");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const patient = patients.find((p) => p.id === selectedPatient);
+      if (!patient) throw new Error("Paciente não encontrado");
+
+      // Criar conta de usuário se ainda não existir
+      let credentials;
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("document", patient.documento)
+        .single();
+
+      if (!existingProfile) {
+        credentials = await createUserAccount(patient);
+      }
+
+      // Upload do arquivo
+      const fileExt = selectedFile.name.split(".").pop();
+      const fileName = `${patient.documento}-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("exame-medico")
+        .upload(fileName, selectedFile);
+
+      if (uploadError) throw uploadError;
+
+      // Registrar o exame na tabela de exames
+      const { error: examError } = await supabase.from("exames").insert([
+        {
+          paciente_id: patient.id,
+          arquivo_nome: fileName,
+          data_upload: new Date().toISOString(),
+        },
+      ]);
+
+      if (examError) throw examError;
+
+      toast.success(
+        "Exame enviado com sucesso! " +
+          (credentials
+            ? "Conta criada para o paciente."
+            : "Paciente já possui conta.")
+      );
+
+      // Limpar formulário
+      setSelectedFile(null);
+      setSelectedPatient("");
+      const fileInput = document.getElementById(
+        "exam-file"
+      ) as HTMLInputElement;
+      if (fileInput) fileInput.value = "";
+    } catch (error: any) {
+      toast.error("Erro ao enviar exame: " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -53,124 +183,53 @@ const MedicalExams = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="patientDocument">Documento do Paciente</Label>
-                  <Input
-                    id="patientDocument"
-                    value={formData.patientDocument}
-                    onChange={(e) =>
-                      setFormData({ ...formData, patientDocument: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="patientName">Nome Completo do Paciente</Label>
-                  <Input
-                    id="patientName"
-                    value={formData.patientName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, patientName: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="patientPhone">Telefone do Paciente</Label>
-                  <Input
-                    id="patientPhone"
-                    value={formData.patientPhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, patientPhone: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="patientAddress">Endereço do Paciente</Label>
-                  <Input
-                    id="patientAddress"
-                    value={formData.patientAddress}
-                    onChange={(e) =>
-                      setFormData({ ...formData, patientAddress: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="parentName">Nome dos Pais</Label>
-                  <Input
-                    id="parentName"
-                    value={formData.parentName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parentName: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="parentEmail">Email dos Pais</Label>
-                  <Input
-                    id="parentEmail"
-                    type="email"
-                    value={formData.parentEmail}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parentEmail: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="parentPhone">Telefone dos Pais</Label>
-                  <Input
-                    id="parentPhone"
-                    value={formData.parentPhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parentPhone: e.target.value })
-                    }
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="patient">Paciente</Label>
+                <Select
+                  value={selectedPatient}
+                  onValueChange={setSelectedPatient}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o paciente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {patients.map((patient) => (
+                      <SelectItem key={patient.id} value={patient.id}>
+                        {patient.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Arquivo do Exame</Label>
-                <Input type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                <Label htmlFor="exam-file">Arquivo do Exame</Label>
+                <Input
+                  id="exam-file"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={handleFileChange}
+                />
               </div>
 
-              <Button type="submit" className="w-full">
-                Enviar Exame
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !selectedFile || !selectedPatient}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <FileUp className="mr-2 h-4 w-4" />
+                    Enviar Exame
+                  </>
+                )}
               </Button>
             </form>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Exames Enviados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {examFiles.map((file) => (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div>
-                    <h3 className="font-semibold">{file.patientName}</h3>
-                    <p className="text-sm text-gray-500">{file.fileName}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleWhatsAppClick(file.patientPhone)}
-                    >
-                      WhatsApp Paciente
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleWhatsAppClick(file.parentPhone)}
-                    >
-                      WhatsApp Pais
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
           </CardContent>
         </Card>
       </div>
