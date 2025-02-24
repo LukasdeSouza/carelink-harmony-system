@@ -56,8 +56,15 @@ export function FlowProvider({ children }: { children: React.ReactNode }) {
     }
   }, [selectedFlow]);
 
+  const value = {
+    selectedFlow,
+    setSelectedFlow,
+    userRole,
+    setUserRole
+  };
+
   return (
-    <FlowContext.Provider value={{ selectedFlow, setSelectedFlow, userRole, setUserRole }}>
+    <FlowContext.Provider value={value}>
       {children}
     </FlowContext.Provider>
   );
