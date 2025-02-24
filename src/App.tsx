@@ -17,19 +17,12 @@ import Patients from "./pages/patients";
 import MedicalExams from "./pages/medical-exams";
 import NotFound from "./pages/NotFound";
 import Inventory from "./pages/inventory";
-import InventoryType from "./pages/inventory/[type]";
+import Products from "./pages/inventory/products";
 import Procedures from "./pages/procedures";
 import FlowSelection from "./pages/flow-selection";
-import AIAssistant from "./pages/ai-assistant";
+import InventoryType from './pages/inventory/[type]';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      retry: 1,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   return (
@@ -52,39 +45,14 @@ const AppRoutes = () => {
           <Dashboard />
         </PrivateRoute>
       } />
-      <Route path="/ai-assistant" element={
-        <PrivateRoute>
-          <AIAssistant />
-        </PrivateRoute>
-      } />
-      <Route path="/staff" element={
-        <PrivateRoute>
-          <Staff />
-        </PrivateRoute>
-      } />
-      <Route path="/patients" element={
-        <PrivateRoute>
-          <Patients />
-        </PrivateRoute>
-      } />
-      <Route path="/time-clock" element={
-        <PrivateRoute>
-          <TimeClock />
-        </PrivateRoute>
-      } />
-      <Route path="/records" element={
-        <PrivateRoute>
-          <Records />
-        </PrivateRoute>
-      } />
-      <Route path="/medical-exams" element={
-        <PrivateRoute>
-          <MedicalExams />
-        </PrivateRoute>
-      } />
       <Route path="/inventory" element={
         <PrivateRoute>
           <Inventory />
+        </PrivateRoute>
+      } />
+      <Route path="/inventory/products" element={
+        <PrivateRoute>
+          <Products />
         </PrivateRoute>
       } />
       <Route path="/inventory/:type" element={
@@ -97,25 +65,48 @@ const AppRoutes = () => {
           <Procedures />
         </PrivateRoute>
       } />
+      <Route path="/time-clock" element={
+        <PrivateRoute>
+          <TimeClock />
+        </PrivateRoute>
+      } />
+      <Route path="/records" element={
+        <PrivateRoute>
+          <Records />
+        </PrivateRoute>
+      } />
+      <Route path="/staff" element={
+        <PrivateRoute>
+          <Staff />
+        </PrivateRoute>
+      } />
+      <Route path="/patients" element={
+        <PrivateRoute>
+          <Patients />
+        </PrivateRoute>
+      } />
+      <Route path="/medical-exams" element={
+        <PrivateRoute>
+          <MedicalExams />
+        </PrivateRoute>
+      } />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
 
-const App = () => {
+function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <FlowProvider>
-          <div className="min-h-screen bg-background font-inter">
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </div>
-        </FlowProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <FlowProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+        <Toaster />
+        <Sonner />
+      </FlowProvider>
+    </QueryClientProvider>
   );
-};
+}
 
 export default App;

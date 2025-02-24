@@ -1,5 +1,15 @@
-
 export type InventoryItemType = "medicine" | "product" | "equipment";
+
+export interface Product {
+  id: string;
+  nome: string;
+  descricao: string;
+  quantidade: number;
+  unidade: string;
+  valor_unidade: number;
+  valor_total: number;
+  data_cadastro?: string;
+}
 
 export interface InventoryItem {
   id: string;
