@@ -1,4 +1,3 @@
-
 import {
   Sidebar,
   SidebarContent,
@@ -38,7 +37,7 @@ const menuItemsByRole = {
         url: "/dashboard",
       },
       {
-        title: "Enfermeiros",
+        title: "Funcionários",
         icon: Users,
         url: "/staff",
       },
@@ -185,7 +184,6 @@ export function MainSidebar() {
   if (!userRole || !selectedFlow) return null;
 
   const menuItems = menuItemsByRole[userRole][selectedFlow];
-
 
   return (
     <Sidebar>
