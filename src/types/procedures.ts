@@ -1,3 +1,12 @@
+export interface Procedure {
+  id: string;
+  descricao: string;
+  data_hora: string;
+  valor: number;
+  plano_saude: boolean;
+  paciente_id: string;
+  medico_id: string;
+}
 
 import { InventoryItem } from "./inventory";
 
