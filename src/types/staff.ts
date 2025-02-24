@@ -33,15 +33,15 @@ export interface Nurse {
 
 export interface Patient {
   id: string;
-  responsibleName: string;
-  responsibleCPF: string;
-  address: string;
+  nome: string;
   email: string;
-  phone1: string;
-  phone2: string;
-  patientName: string;
-  gender: 'male' | 'female' | 'other';
-  patientCPF: string;
-  birthDate: string;
-  observations: string;
+  documento: string;
+  cidade_natal: string;
+  estado_natal: string;
+  telefone_familia: string;
+  idade: number;
+  peso: number;
+  altura: number;
+  anamnese_id?: number;
+  atestado_id?: number;
 }
