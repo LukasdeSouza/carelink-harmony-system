@@ -7,8 +7,16 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { FileUp, Loader2 } from "lucide-react";
+import { FileUp, Loader2, Download, Eye } from "lucide-react";
 import { Patient } from "@/types/staff";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -21,15 +29,10 @@ import { generateRandomPassword, generateUsername } from "@/utils/auth";
 
 interface ExamFile {
   id: string;
-  patientDocument: string;
-  patientName: string;
-  patientPhone: string;
-  patientAddress: string;
-  parentName: string;
-  parentEmail: string;
-  parentPhone: string;
-  fileName: string;
-  uploadDate: string;
+  paciente_id: string;
+  arquivo_nome: string;
+  data_upload: string;
+  paciente?: Patient;
 }
 
 const MedicalExams = () => {
@@ -37,7 +40,9 @@ const MedicalExams = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingList, setIsLoadingList] = useState(true);
   const [selectedPatient, setSelectedPatient] = useState<string>("");
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
   const loadPatients = async () => {
     try {
@@ -53,8 +58,45 @@ const MedicalExams = () => {
     }
   };
 
+  const loadExams = async () => {
+    setIsLoadingList(true);
+    try {
+      const { data, error } = await supabase
+        .from("exames")
+        .select("*")
+        .order("data_upload", { ascending: false });
+
+      if (error) throw error;
+
+      // Get patient info for each exam
+      const examsWithPatients = await Promise.all(
+        (data || []).map(async (exam) => {
+          const { data: patientData, error: patientError } = await supabase
+            .from("pacientes")
+            .select("*")
+            .eq("id", exam.paciente_id)
+            .single();
+
+          if (patientError) {
+            console.error("Error fetching patient:", patientError);
+            return { ...exam, paciente: null };
+          }
+
+          return { ...exam, paciente: patientData };
+        })
+      );
+
+      setExamFiles(examsWithPatients);
+    } catch (error: any) {
+      toast.error("Erro ao carregar exames: " + error.message);
+    } finally {
+      setIsLoadingList(false);
+    }
+  };
+
   useEffect(() => {
     loadPatients();
+    loadExams();
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,17 +200,61 @@ const MedicalExams = () => {
             : "Paciente já possui conta.")
       );
 
-      // Limpar formulário
+      // Limpar formulário e atualizar lista
       setSelectedFile(null);
       setSelectedPatient("");
       const fileInput = document.getElementById(
         "exam-file"
       ) as HTMLInputElement;
       if (fileInput) fileInput.value = "";
+      
+      // Recarregar lista de exames
+      loadExams();
     } catch (error: any) {
       toast.error("Erro ao enviar exame: " + error.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDownload = async (fileName: string) => {
+    setIsDownloading(fileName);
+    try {
+      const { data, error } = await supabase.storage
+        .from("exame-medico")
+        .download(fileName);
+
+      if (error) throw error;
+
+      // Create URL and trigger download
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success("Arquivo baixado com sucesso!");
+    } catch (error: any) {
+      toast.error("Erro ao baixar arquivo: " + error.message);
+    } finally {
+      setIsDownloading(null);
+    }
+  };
+
+  const handleViewExam = async (fileName: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from("exame-medico")
+        .createSignedUrl(fileName, 60);
+
+      if (error) throw error;
+
+      window.open(data.signedUrl, '_blank');
+    } catch (error: any) {
+      toast.error("Erro ao visualizar arquivo: " + error.message);
     }
   };
 
@@ -230,6 +316,72 @@ const MedicalExams = () => {
                 )}
               </Button>
             </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Exames Enviados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingList ? (
+              <div className="flex justify-center p-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : examFiles.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Nenhum exame encontrado
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Paciente</TableHead>
+                    <TableHead>Arquivo</TableHead>
+                    <TableHead>Data de Upload</TableHead>
+                    <TableHead>Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {examFiles.map((exam) => (
+                    <TableRow key={exam.id}>
+                      <TableCell>
+                        {exam.paciente ? exam.paciente.nome : "Paciente não encontrado"}
+                      </TableCell>
+                      <TableCell>{exam.arquivo_nome}</TableCell>
+                      <TableCell>
+                        {format(new Date(exam.data_upload), "dd/MM/yyyy HH:mm")}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewExam(exam.arquivo_nome)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownload(exam.arquivo_nome)}
+                            disabled={isDownloading === exam.arquivo_nome}
+                          >
+                            {isDownloading === exam.arquivo_nome ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                            ) : (
+                              <Download className="h-4 w-4 mr-1" />
+                            )}
+                            Baixar
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
