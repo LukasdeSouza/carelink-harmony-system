@@ -43,13 +43,38 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter antialiased;
+    @apply bg-sky-50 text-foreground font-inter antialiased;
+    transition: background-color 0.3s ease;
   }
 }
 
 @layer utilities {
   .font-inter {
     font-family: 'Inter', sans-serif;
+  }
+  
+  .pulse-animation {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  .hover-shadow {
+    @apply transition-shadow duration-200 hover:shadow-md;
+  }
+  
+  .subtle-bounce {
+    animation: subtleBounce 6s ease-in-out infinite;
+  }
+  
+  .fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:bg-sky-50 hover:shadow-md hover:border-primary-300;
   }
 }
 
@@ -59,7 +84,13 @@
 }
 
 .slide-in {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.4s ease-out;
+}
+
+.pop-in {
+  animation: popIn 0.3s ease-out forwards;
+  opacity: 0;
+  transform: scale(0.95);
 }
 
 @keyframes fadeIn {
@@ -78,9 +109,52 @@
   }
 }
 
+@keyframes popIn {
+  0% { 
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes subtleBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Healthcare-specific styles */
 .vital-sign-card {
-  @apply bg-white rounded-lg shadow-sm p-4 border border-gray-100 hover:border-primary-200 transition-colors;
+  @apply bg-white rounded-lg shadow-sm p-5 border border-gray-100 hover:border-primary-300 transition-all duration-300;
 }
 
 .stat-value {
@@ -88,6 +162,45 @@
 }
 
 .medical-grid {
-  @apply grid gap-4 p-4;
+  @apply grid gap-5 p-4;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.menu-icon {
+  @apply text-primary-500 transition-colors duration-300 group-hover:text-primary-700;
+}
+
+.menu-item {
+  @apply flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-300 hover:bg-sky-100;
+}
+
+.menu-item.active {
+  @apply bg-sky-100 text-primary-700 font-medium;
+}
+
+.glass-card {
+  @apply bg-white/90 backdrop-blur-sm border border-sky-100 shadow-sm hover:shadow-md transition-all duration-300;
+}
+
+.form-grid {
+  @apply grid gap-5;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* Loading animation */
+.loading-spinner {
+  @apply inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite];
+  border-color: currentColor transparent currentColor transparent;
+}
+
+.animated-gradient {
+  background: linear-gradient(90deg, #e3f2fd, #bbdefb, #90caf9, #bbdefb, #e3f2fd);
+  background-size: 400% 400%;
+  animation: gradient 8s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }

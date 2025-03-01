@@ -1,3 +1,4 @@
+
 import {
   Sidebar,
   SidebarContent,
@@ -186,52 +187,65 @@ export function MainSidebar() {
   const menuItems = menuItemsByRole[userRole][selectedFlow];
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2 text-primary-700">
-          <Stethoscope className="w-6 h-6" />
-          <h2 className="text-lg font-semibold">Dr. Fácil</h2>
+    <Sidebar className="w-72 border-r border-sky-100">
+      <SidebarHeader className="p-5 border-b border-sky-100">
+        <div className="flex items-center gap-3 text-primary-700">
+          <div className="bg-primary-50 p-2 rounded-full">
+            <Stethoscope className="w-6 h-6 text-primary-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">Dr. Fácil</h2>
+            <p className="text-xs text-gray-500">{selectedFlow === 'clinical' ? 'Sistema Clínico' : 'Sistema Administrativo'}</p>
+          </div>
         </div>
       </SidebarHeader>
-      <SidebarContent className="bg-sky-50">
+      <SidebarContent className="bg-white">
         <SidebarGroup>
-          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sm font-medium text-gray-500 px-4 py-2">
+            Menu Principal
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {menuItems.map((item, index) => (
+                <SidebarMenuItem key={item.title} className="pop-in" style={{ animationDelay: `${index * 0.05}s` }}>
                   <SidebarMenuButton asChild>
                     <a
                       href={item.url}
-                      className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-sky-100 transition-colors"
+                      className="menu-item group"
                     >
-                      <item.icon className="w-5 h-5 text-primary-600" />
+                      <item.icon className="w-5 h-5 menu-icon" />
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              <SidebarMenuItem>
+              <SidebarMenuItem className="pop-in" style={{ animationDelay: `${menuItems.length * 0.05}s` }}>
                 <SidebarMenuButton
                   onClick={handleChangeFlow}
-                  className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-sky-100 transition-colors"
+                  className="menu-item group"
                 >
-                  <Building2 className="w-5 h-5 text-primary-600" />
+                  <Building2 className="w-5 h-5 menu-icon" />
                   <span>Trocar Sistema</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
+              <SidebarMenuItem className="pop-in" style={{ animationDelay: `${(menuItems.length + 1) * 0.05}s` }}>
                 <SidebarMenuButton
                   onClick={handleLogout}
-                  className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-sky-100 transition-colors text-red-600"
+                  className="menu-item group text-red-600 hover:bg-red-50"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-5 h-5 transition-colors duration-300 group-hover:text-red-700" />
                   <span>Sair</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <div className="absolute bottom-4 left-0 right-0 px-4">
+          <div className="bg-sky-50 rounded-lg p-3 text-xs text-sky-800 border border-sky-100">
+            <p className="font-medium">Dr. Fácil</p>
+            <p>Sistema de Gestão para Clínicas</p>
+          </div>
+        </div>
       </SidebarContent>
     </Sidebar>
   );
