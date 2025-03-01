@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Procedure } from "@/types/procedures";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Staff } from "@/types/staff";
 import { Patient } from "@/types/staff";
 import {
@@ -33,6 +33,10 @@ export function ProcedureForm({ onSubmit, initialData, onCancel, doctors, patien
     paciente_id: initialData?.paciente_id || "",
     medico_id: initialData?.medico_id || "",
   });
+
+  // Get patient and doctor names for display
+  const selectedPatientName = patients.find(p => p.id === formData.paciente_id)?.nome || "Selecione o paciente";
+  const selectedDoctorName = doctors.find(d => d.id === formData.medico_id)?.nome || "Selecione o médico";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,10 +105,12 @@ export function ProcedureForm({ onSubmit, initialData, onCancel, doctors, patien
           }
           required
         >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione o paciente" />
+          <SelectTrigger className="w-full bg-white">
+            <SelectValue placeholder="Selecione o paciente">
+              {selectedPatientName}
+            </SelectValue>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper" className="bg-white z-50 max-h-60 overflow-y-auto">
             {patients.map((patient) => (
               <SelectItem key={patient.id} value={patient.id}>
                 {patient.nome}
@@ -123,10 +129,12 @@ export function ProcedureForm({ onSubmit, initialData, onCancel, doctors, patien
           }
           required
         >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione o médico" />
+          <SelectTrigger className="w-full bg-white">
+            <SelectValue placeholder="Selecione o médico">
+              {selectedDoctorName}
+            </SelectValue>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper" className="bg-white z-50 max-h-60 overflow-y-auto">
             {doctors.map((doctor) => (
               <SelectItem key={doctor.id} value={doctor.id}>
                 {doctor.nome}

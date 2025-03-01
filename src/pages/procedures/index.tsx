@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -134,11 +133,13 @@ export default function Procedures() {
   };
 
   const findPatientName = (id: string) => {
-    return patients.find(patient => patient.id === id)?.nome || "Paciente não encontrado";
+    const patient = patients.find(patient => patient.id === id);
+    return patient ? patient.nome : "Paciente não encontrado";
   };
 
   const findDoctorName = (id: string) => {
-    return doctors.find(doctor => doctor.id === id)?.nome || "Médico não encontrado";
+    const doctor = doctors.find(doctor => doctor.id === id);
+    return doctor ? doctor.nome : "Médico não encontrado";
   };
 
   return (

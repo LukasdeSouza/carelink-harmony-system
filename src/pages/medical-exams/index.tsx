@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,7 +67,6 @@ const MedicalExams = () => {
 
       if (error) throw error;
 
-      // Get patient info for each exam
       const examsWithPatients = await Promise.all(
         (data || []).map(async (exam) => {
           const { data: patientData, error: patientError } = await supabase
@@ -111,7 +109,6 @@ const MedicalExams = () => {
       const password = generateRandomPassword();
       const username = generateUsername(patient.nome);
 
-      // Criar usuário no auth do Supabase
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -124,7 +121,6 @@ const MedicalExams = () => {
 
       if (authError) throw authError;
 
-      // Criar perfil na tabela profiles
       const { error: profileError } = await supabase.from("profiles").insert([
         {
           id: authData.user?.id,
@@ -135,7 +131,6 @@ const MedicalExams = () => {
 
       if (profileError) throw profileError;
 
-      // Enviar credenciais por email (você precisará implementar isso)
       toast.success(
         `Credenciais criadas - Email: ${email}, Senha: ${password}. Guarde essas informações.`
       );
@@ -160,7 +155,6 @@ const MedicalExams = () => {
       const patient = patients.find((p) => p.id === selectedPatient);
       if (!patient) throw new Error("Paciente não encontrado");
 
-      // Criar conta de usuário se ainda não existir
       let credentials;
       const { data: existingProfile } = await supabase
         .from("profiles")
@@ -172,7 +166,6 @@ const MedicalExams = () => {
         credentials = await createUserAccount(patient);
       }
 
-      // Upload do arquivo
       const fileExt = selectedFile.name.split(".").pop();
       const fileName = `${patient.documento}-${Date.now()}.${fileExt}`;
 
@@ -182,7 +175,6 @@ const MedicalExams = () => {
 
       if (uploadError) throw uploadError;
 
-      // Registrar o exame na tabela de exames
       const { error: examError } = await supabase.from("exames").insert([
         {
           paciente_id: patient.id,
@@ -200,7 +192,6 @@ const MedicalExams = () => {
             : "Paciente já possui conta.")
       );
 
-      // Limpar formulário e atualizar lista
       setSelectedFile(null);
       setSelectedPatient("");
       const fileInput = document.getElementById(
@@ -208,7 +199,6 @@ const MedicalExams = () => {
       ) as HTMLInputElement;
       if (fileInput) fileInput.value = "";
       
-      // Recarregar lista de exames
       loadExams();
     } catch (error: any) {
       toast.error("Erro ao enviar exame: " + error.message);
@@ -226,7 +216,6 @@ const MedicalExams = () => {
 
       if (error) throw error;
 
-      // Create URL and trigger download
       const url = URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
@@ -258,6 +247,8 @@ const MedicalExams = () => {
     }
   };
 
+  const selectedPatientName = patients.find(p => p.id === selectedPatient)?.nome || "Selecione o paciente";
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -275,10 +266,12 @@ const MedicalExams = () => {
                   value={selectedPatient}
                   onValueChange={setSelectedPatient}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o paciente" />
+                  <SelectTrigger className="w-full bg-white">
+                    <SelectValue placeholder="Selecione o paciente">
+                      {selectedPatientName}
+                    </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper" className="bg-white z-50 max-h-60 overflow-y-auto">
                     {patients.map((patient) => (
                       <SelectItem key={patient.id} value={patient.id}>
                         {patient.nome}
