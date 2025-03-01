@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -21,6 +22,8 @@ import Products from "./pages/inventory/products";
 import Procedures from "./pages/procedures";
 import FlowSelection from "./pages/flow-selection";
 import InventoryType from './pages/inventory/[type]';
+import Schedule from './pages/schedule';
+import Financial from './pages/financial';
 
 const queryClient = new QueryClient();
 
@@ -88,6 +91,16 @@ const AppRoutes = () => {
       <Route path="/medical-exams" element={
         <PrivateRoute>
           <MedicalExams />
+        </PrivateRoute>
+      } />
+      <Route path="/schedule" element={
+        <PrivateRoute>
+          <Schedule />
+        </PrivateRoute>
+      } />
+      <Route path="/financial" element={
+        <PrivateRoute>
+          <Financial />
         </PrivateRoute>
       } />
       <Route path="*" element={<NotFound />} />
