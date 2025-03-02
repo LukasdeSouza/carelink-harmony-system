@@ -24,6 +24,7 @@ import FlowSelection from "./pages/flow-selection";
 import InventoryType from './pages/inventory/[type]';
 import Schedule from './pages/schedule';
 import Financial from './pages/financial';
+import AIAssistant from './pages/ai-assistant';
 
 const queryClient = new QueryClient();
 
@@ -101,6 +102,11 @@ const AppRoutes = () => {
       <Route path="/financial" element={
         <PrivateRoute>
           <Financial />
+        </PrivateRoute>
+      } />
+      <Route path="/ai-assistant" element={
+        <PrivateRoute>
+          <AIAssistant />
         </PrivateRoute>
       } />
       <Route path="*" element={<NotFound />} />

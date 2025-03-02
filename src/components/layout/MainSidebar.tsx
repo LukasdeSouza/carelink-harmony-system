@@ -1,4 +1,3 @@
-
 import {
   Sidebar,
   SidebarContent,
@@ -32,11 +31,6 @@ import { useFlow } from "@/contexts/FlowContext";
 const menuItemsByRole = {
   admin: {
     clinical: [
-      {
-        title: "Painel Principal",
-        icon: BarChart3,
-        url: "/dashboard",
-      },
       {
         title: "Funcionários",
         icon: Users,
@@ -98,11 +92,6 @@ const menuItemsByRole = {
   },
   nurse: {
     clinical: [
-      {
-        title: "Painel Principal",
-        icon: BarChart3,
-        url: "/dashboard",
-      },
       {
         title: "Pacientes",
         icon: UserRound,
