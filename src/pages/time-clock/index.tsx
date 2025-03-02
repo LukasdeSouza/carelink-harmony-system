@@ -50,11 +50,11 @@ const TimeClock = () => {
 
       const userId = userData.user?.id;
 
-      // Get time clock entries
+      // Get time clock entries - adjust column names based on your actual table structure
       const { data, error } = await supabase
         .from('ponto_eletronico')
         .select('*')
-        .order('timestamp', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error("Error fetching time clock entries:", error);
@@ -63,11 +63,12 @@ const TimeClock = () => {
         return;
       }
 
-      // Transform data into WorkDay format
+      // Transform data into WorkDay format - adjust property names based on your actual table structure
       const groupedByDate: Record<string, TimeClockEntry[]> = {};
       
       data?.forEach(entry => {
-        const date = new Date(entry.timestamp).toISOString().split('T')[0];
+        // Use created_at as the timestamp
+        const date = new Date(entry.created_at).toISOString().split('T')[0];
         
         if (!groupedByDate[date]) {
           groupedByDate[date] = [];
@@ -75,13 +76,13 @@ const TimeClock = () => {
         
         groupedByDate[date].push({
           id: entry.id,
-          userId: entry.user_id,
-          userName: entry.user_name || "Usuário",
+          userId: entry.user_id || userId || "",
+          userName: entry.user_name || userData.user?.email || "Usuário",
           type: entry.type,
-          timestamp: entry.timestamp,
+          timestamp: entry.created_at,
           location: {
-            latitude: entry.latitude,
-            longitude: entry.longitude,
+            latitude: entry.lat || 0,
+            longitude: entry.lng || 0,
           },
         });
       });
@@ -129,15 +130,15 @@ const TimeClock = () => {
         return;
       }
       
-      // Insert entry into Supabase
+      // Insert entry into Supabase - adjust property names based on your actual table structure
       const { data, error } = await supabase.from('ponto_eletronico').insert([
         {
           user_id: userId,
           user_name: userName,
           type,
-          timestamp: now.toISOString(),
-          latitude: coords.latitude,
-          longitude: coords.longitude,
+          created_at: now.toISOString(),
+          lat: coords.latitude,
+          lng: coords.longitude,
         }
       ]);
       
@@ -148,21 +149,6 @@ const TimeClock = () => {
       }
       
       toast.success("Ponto registrado com sucesso!");
-      
-      // Update local state
-      const today = now.toISOString().split('T')[0];
-      
-      const newEntry: TimeClockEntry = {
-        id: Date.now().toString(), // This will be replaced with actual ID after refetch
-        userId,
-        userName,
-        type,
-        timestamp: now.toISOString(),
-        location: {
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        },
-      };
       
       // Refresh the data to get the server-generated ID
       fetchTimeClockEntries();
