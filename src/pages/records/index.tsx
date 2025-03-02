@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -22,24 +23,179 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MedicalRecord } from "@/types/medical-record";
-import { useState } from "react";
+import { Patient } from "@/types/staff";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Search, PlusCircle, FileEdit } from "lucide-react";
+import { Search, PlusCircle, FileEdit, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Records = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<string>("");
+  const [loadingPatients, setLoadingPatients] = useState(false);
+  const [recordDate, setRecordDate] = useState<string>(
+    new Date().toISOString().slice(0, 16)
+  );
+  
+  // Form state
+  const [bloodPressure, setBloodPressure] = useState("");
+  const [spO2, setSpO2] = useState<number | "">("");
+  const [temperature, setTemperature] = useState<number | "">("");
+  const [respiratoryRate, setRespiratoryRate] = useState<number | "">("");
+  const [heartRate, setHeartRate] = useState<number | "">("");
+  const [orientation, setOrientation] = useState("");
+  const [consciousness, setConsciousness] = useState("");
+  const [emotionalState, setEmotionalState] = useState("");
+  const [nutritionType, setNutritionType] = useState<string[]>([]);
+  const [nutritionAcceptance, setNutritionAcceptance] = useState<string[]>([]);
+  const [nutritionObservations, setNutritionObservations] = useState("");
+  const [urinaryStatus, setUrinaryStatus] = useState<string[]>([]);
+  const [urinaryObservations, setUrinaryObservations] = useState("");
+  const [intestinalStatus, setIntestinalStatus] = useState<string[]>([]);
+  const [intestinalObservations, setIntestinalObservations] = useState("");
+  const [hydrationAmount, setHydrationAmount] = useState("");
+  const [hydrationObservations, setHydrationObservations] = useState("");
+  const [generalNotes, setGeneralNotes] = useState("");
 
-  const handleCreateRecord = (data: Omit<MedicalRecord, "id" | "createdAt" | "updatedAt">) => {
-    const newRecord: MedicalRecord = {
-      ...data,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+  // Fetch patients from Supabase
+  useEffect(() => {
+    const fetchPatients = async () => {
+      setLoadingPatients(true);
+      try {
+        const { data, error } = await supabase
+          .from("pacientes")
+          .select("*")
+          .order("nome");
+
+        if (error) throw error;
+        setPatients(data || []);
+      } catch (error: any) {
+        console.error("Error fetching patients:", error);
+        toast.error("Erro ao carregar pacientes: " + error.message);
+      } finally {
+        setLoadingPatients(false);
+      }
     };
-    setRecords([...records, newRecord]);
-    toast.success("Registro médico criado com sucesso!");
+
+    fetchPatients();
+  }, []);
+
+  // Fetch records from Supabase
+  useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("prontuarios")
+          .select("*, pacientes(nome)")
+          .order("dateTime", { ascending: false });
+
+        if (error) throw error;
+
+        const formattedRecords = data.map((record: any) => ({
+          ...record,
+          patientName: record.pacientes?.nome || "Paciente não encontrado"
+        }));
+
+        setRecords(formattedRecords);
+      } catch (error: any) {
+        console.error("Error fetching records:", error);
+        toast.error("Erro ao carregar prontuários: " + error.message);
+      }
+    };
+
+    fetchRecords();
+  }, []);
+
+  const resetForm = () => {
+    setSelectedPatient("");
+    setRecordDate(new Date().toISOString().slice(0, 16));
+    setBloodPressure("");
+    setSpO2("");
+    setTemperature("");
+    setRespiratoryRate("");
+    setHeartRate("");
+    setOrientation("");
+    setConsciousness("");
+    setEmotionalState("");
+    setNutritionType([]);
+    setNutritionAcceptance([]);
+    setNutritionObservations("");
+    setUrinaryStatus([]);
+    setUrinaryObservations("");
+    setIntestinalStatus([]);
+    setIntestinalObservations("");
+    setHydrationAmount("");
+    setHydrationObservations("");
+    setGeneralNotes("");
+  };
+
+  const handleCreateRecord = async () => {
+    if (!selectedPatient) {
+      toast.error("Por favor, selecione um paciente");
+      return;
+    }
+
+    try {
+      const newRecord = {
+        patientId: selectedPatient,
+        dateTime: recordDate,
+        vitalSigns: {
+          bloodPressure,
+          spO2: spO2 === "" ? null : Number(spO2),
+          temperature: temperature === "" ? null : Number(temperature),
+          respiratoryRate: respiratoryRate === "" ? null : Number(respiratoryRate),
+          heartRate: heartRate === "" ? null : Number(heartRate)
+        },
+        orientation,
+        consciousness,
+        emotionalState,
+        nutrition: {
+          type: nutritionType,
+          acceptance: nutritionAcceptance,
+          observations: nutritionObservations
+        },
+        elimination: {
+          urinary: {
+            status: urinaryStatus,
+            observations: urinaryObservations
+          },
+          intestinal: {
+            status: intestinalStatus,
+            observations: intestinalObservations
+          }
+        },
+        hydration: {
+          amount: hydrationAmount,
+          observations: hydrationObservations
+        },
+        generalNotes
+      };
+
+      const { data, error } = await supabase
+        .from("prontuarios")
+        .insert([newRecord])
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Add the patient name to the record for display
+      const patientName = patients.find(p => p.id === selectedPatient)?.nome || "Desconhecido";
+      const recordWithPatientName = {
+        ...data,
+        patientName
+      };
+
+      setRecords([recordWithPatientName, ...records]);
+      resetForm();
+      toast.success("Registro médico criado com sucesso!");
+    } catch (error: any) {
+      console.error("Error creating record:", error);
+      toast.error("Erro ao criar prontuário: " + error.message);
+    }
   };
 
   return (
@@ -57,19 +213,47 @@ const Records = () => {
             <DialogContent className="max-w-4xl">
               <DialogHeader>
                 <DialogTitle>Novo Registro Médico</DialogTitle>
+                <DialogDescription>
+                  Preencha os dados do prontuário para o paciente selecionado
+                </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecionar Paciente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">João Silva</SelectItem>
-                      <SelectItem value="2">Maria Santos</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input type="datetime-local" />
+                  <div>
+                    <Label htmlFor="patient-select">Paciente</Label>
+                    <Select onValueChange={setSelectedPatient} value={selectedPatient}>
+                      <SelectTrigger id="patient-select">
+                        <SelectValue placeholder={loadingPatients ? "Carregando pacientes..." : "Selecionar Paciente"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {loadingPatients ? (
+                          <div className="flex items-center justify-center p-2">
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            <span>Carregando...</span>
+                          </div>
+                        ) : patients.length > 0 ? (
+                          patients.map((patient) => (
+                            <SelectItem key={patient.id} value={patient.id}>
+                              {patient.nome}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-patients" disabled>
+                            Nenhum paciente encontrado
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="record-date">Data e Hora</Label>
+                    <Input 
+                      id="record-date" 
+                      type="datetime-local" 
+                      value={recordDate} 
+                      onChange={(e) => setRecordDate(e.target.value)} 
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -77,23 +261,44 @@ const Records = () => {
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <div>
                       <Label>Pressão Arterial</Label>
-                      <Input placeholder="120/80" />
+                      <Input 
+                        placeholder="120/80" 
+                        value={bloodPressure} 
+                        onChange={(e) => setBloodPressure(e.target.value)} 
+                      />
                     </div>
                     <div>
                       <Label>SpO2 (%)</Label>
-                      <Input type="number" />
+                      <Input 
+                        type="number" 
+                        value={spO2} 
+                        onChange={(e) => setSpO2(e.target.value === "" ? "" : Number(e.target.value))} 
+                      />
                     </div>
                     <div>
                       <Label>Temperatura (°C)</Label>
-                      <Input type="number" step="0.1" />
+                      <Input 
+                        type="number" 
+                        step="0.1" 
+                        value={temperature} 
+                        onChange={(e) => setTemperature(e.target.value === "" ? "" : Number(e.target.value))} 
+                      />
                     </div>
                     <div>
                       <Label>Freq. Respiratória</Label>
-                      <Input type="number" />
+                      <Input 
+                        type="number" 
+                        value={respiratoryRate} 
+                        onChange={(e) => setRespiratoryRate(e.target.value === "" ? "" : Number(e.target.value))} 
+                      />
                     </div>
                     <div>
                       <Label>Freq. Cardíaca</Label>
-                      <Input type="number" />
+                      <Input 
+                        type="number" 
+                        value={heartRate} 
+                        onChange={(e) => setHeartRate(e.target.value === "" ? "" : Number(e.target.value))} 
+                      />
                     </div>
                   </div>
                 </div>
@@ -101,7 +306,7 @@ const Records = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label>Orientação</Label>
-                    <Select>
+                    <Select onValueChange={setOrientation} value={orientation}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
@@ -113,7 +318,7 @@ const Records = () => {
                   </div>
                   <div>
                     <Label>Consciência</Label>
-                    <Select>
+                    <Select onValueChange={setConsciousness} value={consciousness}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
@@ -127,7 +332,7 @@ const Records = () => {
                   </div>
                   <div>
                     <Label>Estado Emocional</Label>
-                    <Select>
+                    <Select onValueChange={setEmotionalState} value={emotionalState}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
@@ -148,26 +353,70 @@ const Records = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="oral" />
+                        <Checkbox 
+                          id="oral" 
+                          checked={nutritionType.includes("oral")}
+                          onCheckedChange={(checked) => {
+                            setNutritionType(
+                              checked 
+                                ? [...nutritionType, "oral"] 
+                                : nutritionType.filter(t => t !== "oral")
+                            );
+                          }} 
+                        />
                         <label htmlFor="oral">Via Oral</label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="tube" />
+                        <Checkbox 
+                          id="tube" 
+                          checked={nutritionType.includes("tube")}
+                          onCheckedChange={(checked) => {
+                            setNutritionType(
+                              checked 
+                                ? [...nutritionType, "tube"] 
+                                : nutritionType.filter(t => t !== "tube")
+                            );
+                          }} 
+                        />
                         <label htmlFor="tube">Sonda</label>
                       </div>
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="accepted" />
+                        <Checkbox 
+                          id="accepted" 
+                          checked={nutritionAcceptance.includes("accepted")}
+                          onCheckedChange={(checked) => {
+                            setNutritionAcceptance(
+                              checked 
+                                ? [...nutritionAcceptance, "accepted"] 
+                                : nutritionAcceptance.filter(a => a !== "accepted")
+                            );
+                          }} 
+                        />
                         <label htmlFor="accepted">Aceita</label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="rejected" />
+                        <Checkbox 
+                          id="rejected" 
+                          checked={nutritionAcceptance.includes("rejected")}
+                          onCheckedChange={(checked) => {
+                            setNutritionAcceptance(
+                              checked 
+                                ? [...nutritionAcceptance, "rejected"] 
+                                : nutritionAcceptance.filter(a => a !== "rejected")
+                            );
+                          }} 
+                        />
                         <label htmlFor="rejected">Rejeita</label>
                       </div>
                     </div>
                   </div>
-                  <Textarea placeholder="Observações sobre nutrição" />
+                  <Textarea 
+                    placeholder="Observações sobre nutrição" 
+                    value={nutritionObservations}
+                    onChange={(e) => setNutritionObservations(e.target.value)}
+                  />
                 </div>
 
                 <div className="space-y-4">
@@ -177,36 +426,86 @@ const Records = () => {
                       <h4 className="font-medium mb-2">Urinária</h4>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
-                          <Checkbox id="urinary-present" />
+                          <Checkbox 
+                            id="urinary-present" 
+                            checked={urinaryStatus.includes("present")}
+                            onCheckedChange={(checked) => {
+                              setUrinaryStatus(
+                                checked 
+                                  ? [...urinaryStatus, "present"] 
+                                  : urinaryStatus.filter(s => s !== "present")
+                              );
+                            }} 
+                          />
                           <label htmlFor="urinary-present">Presente</label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Checkbox id="urinary-absent" />
+                          <Checkbox 
+                            id="urinary-absent" 
+                            checked={urinaryStatus.includes("absent")}
+                            onCheckedChange={(checked) => {
+                              setUrinaryStatus(
+                                checked 
+                                  ? [...urinaryStatus, "absent"] 
+                                  : urinaryStatus.filter(s => s !== "absent")
+                              );
+                            }} 
+                          />
                           <label htmlFor="urinary-absent">Ausente</label>
                         </div>
                       </div>
-                      <Textarea placeholder="Observações" className="mt-2" />
+                      <Textarea 
+                        placeholder="Observações" 
+                        className="mt-2" 
+                        value={urinaryObservations}
+                        onChange={(e) => setUrinaryObservations(e.target.value)}
+                      />
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Intestinal</h4>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
-                          <Checkbox id="intestinal-present" />
+                          <Checkbox 
+                            id="intestinal-present" 
+                            checked={intestinalStatus.includes("present")}
+                            onCheckedChange={(checked) => {
+                              setIntestinalStatus(
+                                checked 
+                                  ? [...intestinalStatus, "present"] 
+                                  : intestinalStatus.filter(s => s !== "present")
+                              );
+                            }} 
+                          />
                           <label htmlFor="intestinal-present">Presente</label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Checkbox id="intestinal-absent" />
+                          <Checkbox 
+                            id="intestinal-absent" 
+                            checked={intestinalStatus.includes("absent")}
+                            onCheckedChange={(checked) => {
+                              setIntestinalStatus(
+                                checked 
+                                  ? [...intestinalStatus, "absent"] 
+                                  : intestinalStatus.filter(s => s !== "absent")
+                              );
+                            }} 
+                          />
                           <label htmlFor="intestinal-absent">Ausente</label>
                         </div>
                       </div>
-                      <Textarea placeholder="Observações" className="mt-2" />
+                      <Textarea 
+                        placeholder="Observações" 
+                        className="mt-2" 
+                        value={intestinalObservations}
+                        onChange={(e) => setIntestinalObservations(e.target.value)}
+                      />
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <h3 className="font-semibold">Hidratação</h3>
-                  <Select>
+                  <Select onValueChange={setHydrationAmount} value={hydrationAmount}>
                     <SelectTrigger>
                       <SelectValue placeholder="Quantidade" />
                     </SelectTrigger>
@@ -218,17 +517,25 @@ const Records = () => {
                       <SelectItem value="absent">Ausente</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Textarea placeholder="Observações sobre hidratação" />
+                  <Textarea 
+                    placeholder="Observações sobre hidratação" 
+                    value={hydrationObservations}
+                    onChange={(e) => setHydrationObservations(e.target.value)}
+                  />
                 </div>
 
                 <div>
                   <Label>Observações Gerais</Label>
-                  <Textarea className="min-h-[100px]" />
+                  <Textarea 
+                    className="min-h-[100px]" 
+                    value={generalNotes}
+                    onChange={(e) => setGeneralNotes(e.target.value)}
+                  />
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline">Cancelar</Button>
-                <Button>Salvar</Button>
+                <Button variant="outline" onClick={resetForm}>Cancelar</Button>
+                <Button onClick={handleCreateRecord}>Salvar</Button>
               </div>
             </DialogContent>
           </Dialog>
