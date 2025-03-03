@@ -10,7 +10,7 @@ interface PrivateRouteProps {
 
 export function PrivateRoute({ children }: PrivateRouteProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const { userPermissions } = useFlow();
+  const { userPermissions, userRole } = useFlow();
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1]; // Get first path segment
 

@@ -1,6 +1,4 @@
 
-import { UserRole } from "@/contexts/FlowContext";
-
 export interface Permission {
   id: string;
   route: string;
@@ -18,6 +16,7 @@ export interface UserPermission {
   routes: string[];
 }
 
-export interface ExtendedUserRole extends UserRole {
+export interface ExtendedUserRole {
+  role: 'admin' | 'nurse' | 'receptionist';
   super_admin?: boolean;
 }

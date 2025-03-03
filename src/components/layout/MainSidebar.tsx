@@ -27,8 +27,13 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFlow } from "@/contexts/FlowContext";
+import { UserRole } from "@/contexts/FlowContext";
 
-const menuItemsByRole = {
+const menuItemsByRole: Record<UserRole, Record<'clinical' | 'administrative', {
+  title: string;
+  icon: React.ElementType;
+  url: string;
+}[]>> = {
   admin: {
     clinical: [
       {
@@ -173,7 +178,7 @@ export function MainSidebar() {
 
   if (!userRole || !selectedFlow) return null;
 
-  const menuItems = menuItemsByRole[userRole][selectedFlow];
+  const menuItems = menuItemsByRole[userRole.role][selectedFlow];
 
   return (
     <Sidebar className="w-72 border-r border-sky-100">
