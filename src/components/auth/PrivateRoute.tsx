@@ -1,7 +1,8 @@
 
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useFlow } from "@/contexts/FlowContext";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -9,6 +10,9 @@ interface PrivateRouteProps {
 
 export function PrivateRoute({ children }: PrivateRouteProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { userPermissions } = useFlow();
+  const location = useLocation();
+  const currentPath = location.pathname.split('/')[1]; // Get first path segment
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -24,13 +28,26 @@ export function PrivateRoute({ children }: PrivateRouteProps) {
     };
   }, []);
 
-  // Aguarda a verificação inicial da autenticação
+  // Wait for initial authentication check
   if (isAuthenticated === null) {
     return null;
   }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Check if user has permission to access this route
+  if (userPermissions) {
+    const hasWildcardPermission = userPermissions.routes.includes('*');
+    const hasSpecificPermission = userPermissions.routes.includes(currentPath);
+    
+    // Allow access to root and flow-selection for all authenticated users
+    const isPublicRoute = currentPath === '' || currentPath === 'flow-selection';
+    
+    if (!hasWildcardPermission && !hasSpecificPermission && !isPublicRoute) {
+      return <Navigate to="/flow-selection" replace />;
+    }
   }
 
   return <>{children}</>;
