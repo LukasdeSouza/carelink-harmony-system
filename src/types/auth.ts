@@ -34,6 +34,7 @@ export interface User {
   name: string;
   role: 'admin' | 'nurse' | 'receptionist';
   super_admin?: boolean;
+  bio?: string; // New field for user bio
   subscription?: {
     active: boolean;
     expiresAt: string;
