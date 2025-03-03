@@ -28,7 +28,7 @@ const TimeClock = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEntryType, setSelectedEntryType] = useState<TimeClockEntryType | null>(null);
   const { userRole } = useFlow();
-  const isAdmin = userRole === 'admin';
+  const isAdmin = userRole?.toString() === 'admin';
 
   // Fetch time clock entries when component mounts
   useEffect(() => {
@@ -54,7 +54,7 @@ const TimeClock = () => {
       const { data, error } = await supabase
         .from('ponto_eletronico')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('data_registro', { ascending: false });
 
       if (error) {
         console.error("Error fetching time clock entries:", error);
@@ -68,7 +68,7 @@ const TimeClock = () => {
       
       data?.forEach(entry => {
         // Use created_at as the timestamp
-        const date = new Date(entry.created_at).toISOString().split('T')[0];
+        const date = new Date(entry.data_registro).toISOString().split('T')[0];
         
         if (!groupedByDate[date]) {
           groupedByDate[date] = [];
@@ -76,8 +76,7 @@ const TimeClock = () => {
         
         groupedByDate[date].push({
           id: entry.id,
-          userId: entry.user_id || userId || "",
-          userName: entry.user_name || userData.user?.email || "Usuário",
+          usuario_id: entry.usuario_id || userId || "",
           type: entry.type,
           timestamp: entry.created_at,
           location: {
@@ -90,7 +89,6 @@ const TimeClock = () => {
       const formattedWorkDays: WorkDay[] = Object.keys(groupedByDate).map(date => ({
         id: date,
         userId: userData.user?.id || "",
-        userName: userData.user?.email || "Usuário",
         date,
         entries: groupedByDate[date],
       }));
@@ -123,7 +121,6 @@ const TimeClock = () => {
       }
       
       const userId = userData.user?.id;
-      const userName = userData.user?.email || "Usuário";
       
       if (!userId) {
         toast.error("Usuário não identificado");
@@ -133,14 +130,13 @@ const TimeClock = () => {
       // Insert entry into Supabase - adjust property names based on your actual table structure
       const { data, error } = await supabase.from('ponto_eletronico').insert([
         {
-          user_id: userId,
-          user_name: userName,
-          type,
-          created_at: now.toISOString(),
-          lat: coords.latitude,
-          lng: coords.longitude,
+          usuario_id: userId,
+          tipo: selectedEntryType,
+          data_registro: now.toISOString(),
+          local_registro: `lat${coords.latitude}, long${coords.longitude})`,
         }
       ]);
+      console.log(data);
       
       if (error) {
         console.error("Error registering time clock:", error);
@@ -163,10 +159,15 @@ const TimeClock = () => {
 
   const getEntryTypeLabel = (type: TimeClockEntryType): string => {
     switch (type) {
-      case "in": return "Registrar Entrada";
-      case "lunch-start": return "Início do Almoço";
-      case "lunch-end": return "Fim do Almoço";
-      case "out": return "Registrar Saída";
+      case "ENTRADA": return "Registrar Entrada";
+      case "ALMOCO": return "Início do Almoço";
+      case "VOLTA_ALMOCO": return "Fim do Almoço";
+      case "CAFE": return "Início Café";
+      case "VOLTA_CAFE": return "Volta do Café";
+      case "INTERVALO": return "Intervalo 5min";
+      case "JANTA": return "Início Janta";
+      case "VOLTA_JANTA": return "Volta da Janta";
+      case "SAIDA": return "Registrar Saída";
       default: return "";
     }
   };
@@ -199,28 +200,63 @@ const TimeClock = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button 
-                onClick={() => handleOpenClockInDialog("in")}
+                onClick={() => handleOpenClockInDialog("ENTRADA")}
                 className="flex items-center justify-center gap-2"
               >
                 <Clock size={18} />
                 Registrar Entrada
               </Button>
               <Button 
-                onClick={() => handleOpenClockInDialog("lunch-start")}
+                onClick={() => handleOpenClockInDialog("ALMOCO")}
                 className="flex items-center justify-center gap-2"
               >
                 <Clock size={18} />
                 Início do Almoço
               </Button>
               <Button 
-                onClick={() => handleOpenClockInDialog("lunch-end")}
+                onClick={() => handleOpenClockInDialog("VOLTA_ALMOCO")}
                 className="flex items-center justify-center gap-2"
               >
                 <Clock size={18} />
                 Fim do Almoço
               </Button>
               <Button 
-                onClick={() => handleOpenClockInDialog("out")}
+                onClick={() => handleOpenClockInDialog("CAFE")}
+                className="flex items-center justify-center gap-2"
+              >
+                <Clock size={18} />
+                Início Café da Tarde
+              </Button>
+              <Button 
+                onClick={() => handleOpenClockInDialog("VOLTA_CAFE")}
+                className="flex items-center justify-center gap-2"
+              >
+                <Clock size={18} />
+                Fim Café da Tarde
+              </Button>
+              <Button 
+                onClick={() => handleOpenClockInDialog("INTERVALO")}
+                className="flex items-center justify-center gap-2"
+              >
+                <Clock size={18} />
+                Intervalo 5 Minutos
+              </Button>
+              <Button 
+                onClick={() => handleOpenClockInDialog("JANTA")}
+                className="flex items-center justify-center gap-2"
+              >
+                <Clock size={18} />
+                Início Janta
+              </Button>
+              <Button 
+                onClick={() => handleOpenClockInDialog("VOLTA_JANTA")}
+                className="flex items-center justify-center gap-2"
+              >
+                <Clock size={18} />
+                Volta Janta
+              </Button>
+              <Button 
+                onClick={() => handleOpenClockInDialog("SAIDA")}
                 className="flex items-center justify-center gap-2"
               >
                 <Clock size={18} />

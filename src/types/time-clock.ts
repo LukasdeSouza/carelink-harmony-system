@@ -1,5 +1,5 @@
 
-export type TimeClockEntryType = 'in' | 'lunch-start' | 'lunch-end' | 'out';
+export type TimeClockEntryType = 'ENTRADA' | 'ALMOCO' | 'VOLTA_ALMOCO' | 'CAFE' | 'VOLTA_CAFE' |'INTERVALO'|'JANTA' | 'VOLTA_JANTA' | 'SAIDA';
 
 export interface TimeClockEntry {
   id: string;
