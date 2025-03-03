@@ -37,6 +37,16 @@ export function PrivateRoute({ children }: PrivateRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
+  // Super admin has access to all routes
+  if (userRole?.super_admin) {
+    return <>{children}</>;
+  }
+
+  // Special admin permissions management route - only for super_admin
+  if (currentPath === "admin") {
+    return <Navigate to="/flow-selection" replace />;
+  }
+
   // Check if user has permission to access this route
   if (userPermissions) {
     const hasWildcardPermission = userPermissions.routes.includes('*');
