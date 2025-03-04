@@ -24,6 +24,7 @@ import FinancialPage from "@/pages/financial";
 import TimeClockPage from "@/pages/time-clock";
 import AIAssistantPage from "@/pages/ai-assistant";
 import SettingsPage from "@/pages/settings";
+import ProfilePage from "@/pages/settings/profile";
 import PermissionsPage from "@/pages/admin/permissions";
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
           <Route path="/time-clock" element={<PrivateRoute><TimeClockPage /></PrivateRoute>} />
           <Route path="/ai-assistant" element={<PrivateRoute><AIAssistantPage /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
+          <Route path="/settings/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           <Route path="/admin/permissions" element={<PrivateRoute><PermissionsPage /></PrivateRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
