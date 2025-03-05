@@ -91,16 +91,40 @@ const Records = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const { data, error } = await supabase
+        // First, fetch all prontuarios
+        const { data: recordsData, error: recordsError } = await supabase
           .from("prontuarios")
-          .select("*, pacientes(nome)")
+          .select("*")
           .order("dateTime", { ascending: false });
 
-        if (error) throw error;
+        if (recordsError) throw recordsError;
 
-        const formattedRecords = data.map((record: any) => ({
+        if (!recordsData || recordsData.length === 0) {
+          setRecords([]);
+          return;
+        }
+
+        // Create a map of patient IDs
+        const patientIds = [...new Set(recordsData.map(record => record.patientId))];
+        
+        // Then fetch all related patients
+        const { data: patientsData, error: patientsError } = await supabase
+          .from("pacientes")
+          .select("id, nome")
+          .in("id", patientIds);
+
+        if (patientsError) throw patientsError;
+
+        // Create a map for quick patient lookups
+        const patientMap = (patientsData || []).reduce((map, patient) => {
+          map[patient.id] = patient.nome;
+          return map;
+        }, {});
+
+        // Combine the data
+        const formattedRecords = recordsData.map(record => ({
           ...record,
-          patientName: record.pacientes?.nome || "Paciente não encontrado"
+          patientName: patientMap[record.patientId] || "Paciente não encontrado"
         }));
 
         setRecords(formattedRecords);
