@@ -4,8 +4,11 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Activity, Users, CalendarClock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <AppLayout>
       <div className="space-y-8">
@@ -31,7 +34,11 @@ const Index = () => {
             <p className="text-gray-600 mb-4">
               Gerenciamento de funcionários, pacientes e configurações do sistema
             </p>
-            <Button variant="outline" className="w-full group">
+            <Button 
+              variant="outline" 
+              className="w-full group"
+              onClick={() => navigate("/admin/permissions")}
+            >
               <span>Acessar Área Admin</span>
               <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
             </Button>
@@ -47,7 +54,11 @@ const Index = () => {
             <p className="text-gray-600 mb-4">
               Acesse registros de pacientes e relógio de ponto
             </p>
-            <Button variant="outline" className="w-full group">
+            <Button 
+              variant="outline" 
+              className="w-full group"
+              onClick={() => navigate("/staff")}
+            >
               <span>Portal da Equipe</span>
               <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
             </Button>
@@ -63,7 +74,11 @@ const Index = () => {
             <p className="text-gray-600 mb-4">
               Monitore o progresso do paciente e comunique-se com os cuidadores
             </p>
-            <Button variant="outline" className="w-full group">
+            <Button 
+              variant="outline" 
+              className="w-full group"
+              onClick={() => navigate("/patients")}
+            >
               <span>Portal do Cliente</span>
               <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
             </Button>
@@ -77,7 +92,7 @@ const Index = () => {
                 <h3 className="text-lg font-semibold text-gray-900">Começar a usar o Dr. Fácil</h3>
                 <p className="text-gray-600 mt-1">Configure seu perfil e comece a explorar todos os recursos do sistema.</p>
               </div>
-              <Button className="shrink-0">Configurar Perfil</Button>
+              <Button className="shrink-0" onClick={() => navigate("/settings/profile")}>Configurar Perfil</Button>
             </div>
           </Card>
         </div>
