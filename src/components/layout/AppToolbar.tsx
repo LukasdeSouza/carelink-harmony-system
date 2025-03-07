@@ -9,7 +9,7 @@ export function AppToolbar() {
   return (
     <div className="flex items-center justify-between h-16 px-4 border-b bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
       <div className="flex items-center gap-3">
-        <SidebarTrigger className="lg:hidden" asChild>
+        <SidebarTrigger className="lg:hidden">
           <Button variant="ghost" size="icon">
             <Menu className="h-5 w-5" />
           </Button>
