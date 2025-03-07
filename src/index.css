@@ -37,6 +37,36 @@
  
     --radius: 0.5rem;
   }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 142.1 70.6% 45.3%;
+    --secondary-foreground: 144.9 80.4% 10%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
 
   * {
     @apply border-border;
@@ -45,6 +75,10 @@
   body {
     @apply bg-sky-50 text-foreground font-inter antialiased;
     transition: background-color 0.3s ease;
+  }
+  
+  .dark body {
+    @apply bg-gray-900 text-gray-100;
   }
 }
 
@@ -74,7 +108,7 @@
   }
   
   .card-hover {
-    @apply transition-all duration-300 hover:bg-sky-50 hover:shadow-md hover:border-primary-300;
+    @apply transition-all duration-300 hover:bg-sky-50 hover:shadow-md hover:border-primary-300 dark:hover:bg-gray-800 dark:hover:border-primary-700;
   }
 }
 
@@ -154,11 +188,11 @@
 
 /* Healthcare-specific styles */
 .vital-sign-card {
-  @apply bg-white rounded-lg shadow-sm p-5 border border-gray-100 hover:border-primary-300 transition-all duration-300;
+  @apply bg-white rounded-lg shadow-sm p-5 border border-gray-100 hover:border-primary-300 transition-all duration-300 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-primary-600;
 }
 
 .stat-value {
-  @apply text-2xl font-semibold text-primary-600;
+  @apply text-2xl font-semibold text-primary-600 dark:text-primary-400;
 }
 
 .medical-grid {
@@ -167,19 +201,19 @@
 }
 
 .menu-icon {
-  @apply text-primary-500 transition-colors duration-300 group-hover:text-primary-700;
+  @apply text-primary-500 transition-colors duration-300 group-hover:text-primary-700 dark:text-primary-400 dark:group-hover:text-primary-300;
 }
 
 .menu-item {
-  @apply flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-300 hover:bg-sky-100;
+  @apply flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-300 hover:bg-sky-100 dark:hover:bg-gray-700;
 }
 
 .menu-item.active {
-  @apply bg-sky-100 text-primary-700 font-medium;
+  @apply bg-sky-100 text-primary-700 font-medium dark:bg-gray-700 dark:text-primary-300;
 }
 
 .glass-card {
-  @apply bg-white/90 backdrop-blur-sm border border-sky-100 shadow-sm hover:shadow-md transition-all duration-300;
+  @apply bg-white/90 backdrop-blur-sm border border-sky-100 shadow-sm hover:shadow-md transition-all duration-300 dark:bg-gray-800/90 dark:border-gray-700;
 }
 
 .form-grid {
@@ -195,6 +229,12 @@
 
 .animated-gradient {
   background: linear-gradient(90deg, #e3f2fd, #bbdefb, #90caf9, #bbdefb, #e3f2fd);
+  background-size: 400% 400%;
+  animation: gradient 8s ease infinite;
+}
+
+.dark .animated-gradient {
+  background: linear-gradient(90deg, #1e3a8a, #1e40af, #2563eb, #1e40af, #1e3a8a);
   background-size: 400% 400%;
   animation: gradient 8s ease infinite;
 }
