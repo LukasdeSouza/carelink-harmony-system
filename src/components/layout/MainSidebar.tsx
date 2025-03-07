@@ -1,3 +1,4 @@
+
 import {
   Sidebar,
   SidebarContent,
@@ -181,21 +182,21 @@ export function MainSidebar() {
   const menuItems = menuItemsByRole[userRole.role][selectedFlow];
 
   return (
-    <Sidebar className="w-72 border-r border-sky-100">
-      <SidebarHeader className="p-5 border-b border-sky-100">
-        <div className="flex items-center gap-3 text-primary-700">
-          <div className="bg-primary-50 p-2 rounded-full">
-            <Stethoscope className="w-6 h-6 text-primary-600" />
+    <Sidebar className="w-72 border-r border-sky-100 dark:border-gray-700">
+      <SidebarHeader className="p-5 border-b border-sky-100 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="flex items-center gap-3 text-primary-700 dark:text-primary-400">
+          <div className="bg-primary-50 dark:bg-primary-900/30 p-2 rounded-full">
+            <Stethoscope className="w-6 h-6 text-primary-600 dark:text-primary-400" />
           </div>
           <div>
             <h2 className="text-lg font-semibold">Dr. Fácil</h2>
-            <p className="text-xs text-gray-500">{selectedFlow === 'clinical' ? 'Sistema Clínico' : 'Sistema Administrativo'}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{selectedFlow === 'clinical' ? 'Sistema Clínico' : 'Sistema Administrativo'}</p>
           </div>
         </div>
       </SidebarHeader>
-      <SidebarContent className="bg-white">
+      <SidebarContent className="bg-white dark:bg-gray-800">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sm font-medium text-gray-500 px-4 py-2">
+          <SidebarGroupLabel className="text-sm font-medium text-gray-500 dark:text-gray-400 px-4 py-2">
             Menu Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -205,7 +206,7 @@ export function MainSidebar() {
                   <SidebarMenuButton asChild>
                     <a
                       href={item.url}
-                      className="menu-item group"
+                      className="menu-item group dark:text-gray-200 dark:hover:bg-gray-700"
                     >
                       <item.icon className="w-5 h-5 menu-icon" />
                       <span>{item.title}</span>
@@ -216,7 +217,7 @@ export function MainSidebar() {
               <SidebarMenuItem className="pop-in" style={{ animationDelay: `${menuItems.length * 0.05}s` }}>
                 <SidebarMenuButton
                   onClick={handleChangeFlow}
-                  className="menu-item group"
+                  className="menu-item group dark:text-gray-200 dark:hover:bg-gray-700"
                 >
                   <Building2 className="w-5 h-5 menu-icon" />
                   <span>Trocar Sistema</span>
@@ -225,9 +226,9 @@ export function MainSidebar() {
               <SidebarMenuItem className="pop-in" style={{ animationDelay: `${(menuItems.length + 1) * 0.05}s` }}>
                 <SidebarMenuButton
                   onClick={handleLogout}
-                  className="menu-item group text-red-600 hover:bg-red-50"
+                  className="menu-item group text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                 >
-                  <LogOut className="w-5 h-5 transition-colors duration-300 group-hover:text-red-700" />
+                  <LogOut className="w-5 h-5 transition-colors duration-300 group-hover:text-red-700 dark:group-hover:text-red-300" />
                   <span>Sair</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -235,7 +236,7 @@ export function MainSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <div className="absolute bottom-4 left-0 right-0 px-4">
-          <div className="bg-sky-50 rounded-lg p-3 text-xs text-sky-800 border border-sky-100">
+          <div className="bg-sky-50 dark:bg-gray-700 rounded-lg p-3 text-xs text-sky-800 dark:text-sky-100 border border-sky-100 dark:border-gray-600">
             <p className="font-medium">Dr. Fácil</p>
             <p>Sistema de Gestão para Clínicas</p>
           </div>

@@ -14,10 +14,10 @@ const Index = () => {
       <div className="space-y-8">
         <div className="flex flex-col gap-3">
           <Badge className="w-fit pop-in" variant="secondary">Bem-vindo</Badge>
-          <h1 className="text-4xl font-bold text-gray-900 pop-in" style={{ animationDelay: "0.1s" }}>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 pop-in" style={{ animationDelay: "0.1s" }}>
             Care Management System
           </h1>
-          <p className="text-gray-600 max-w-2xl pop-in" style={{ animationDelay: "0.2s" }}>
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl pop-in" style={{ animationDelay: "0.2s" }}>
             Uma solução completa para profissionais de saúde, gestão de pacientes
             e monitoramento de registros.
           </p>
@@ -26,17 +26,17 @@ const Index = () => {
         <div className="medical-grid">
           <Card className="vital-sign-card pop-in hover-shadow" style={{ animationDelay: "0.3s" }}>
             <div className="flex mb-4">
-              <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                <Activity className="w-5 h-5 text-primary-600" />
+              <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                <Activity className="w-5 h-5 text-primary-600 dark:text-primary-400" />
               </div>
             </div>
-            <h3 className="text-lg font-semibold mb-2 text-primary-700">Master Administrator</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-semibold mb-2 text-primary-700 dark:text-primary-400">Master Administrator</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Gerenciamento de funcionários, pacientes e configurações do sistema
             </p>
             <Button 
               variant="outline" 
-              className="w-full group"
+              className="w-full group dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
               onClick={() => navigate("/admin/permissions")}
             >
               <span>Acessar Área Admin</span>
@@ -46,17 +46,17 @@ const Index = () => {
 
           <Card className="vital-sign-card pop-in hover-shadow" style={{ animationDelay: "0.4s" }}>
             <div className="flex mb-4">
-              <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center">
-                <Users className="w-5 h-5 text-secondary-600" />
+              <div className="w-10 h-10 rounded-full bg-secondary-100 dark:bg-secondary-900/30 flex items-center justify-center">
+                <Users className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
               </div>
             </div>
-            <h3 className="text-lg font-semibold mb-2 text-primary-700">Equipe de Enfermagem</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-semibold mb-2 text-primary-700 dark:text-primary-400">Equipe de Enfermagem</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Acesse registros de pacientes e relógio de ponto
             </p>
             <Button 
               variant="outline" 
-              className="w-full group"
+              className="w-full group dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
               onClick={() => navigate("/staff")}
             >
               <span>Portal da Equipe</span>
@@ -66,17 +66,17 @@ const Index = () => {
 
           <Card className="vital-sign-card pop-in hover-shadow" style={{ animationDelay: "0.5s" }}>
             <div className="flex mb-4">
-              <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center">
-                <CalendarClock className="w-5 h-5 text-sky-600" />
+              <div className="w-10 h-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
+                <CalendarClock className="w-5 h-5 text-sky-600 dark:text-sky-400" />
               </div>
             </div>
-            <h3 className="text-lg font-semibold mb-2 text-primary-700">Área do Cliente</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-semibold mb-2 text-primary-700 dark:text-primary-400">Área do Cliente</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Monitore o progresso do paciente e comunique-se com os cuidadores
             </p>
             <Button 
               variant="outline" 
-              className="w-full group"
+              className="w-full group dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
               onClick={() => navigate("/patients")}
             >
               <span>Portal do Cliente</span>
@@ -86,11 +86,11 @@ const Index = () => {
         </div>
 
         <div className="mt-8">
-          <Card className="p-6 border border-sky-100 bg-gradient-to-r from-sky-50 to-white pop-in" style={{ animationDelay: "0.6s" }}>
+          <Card className="p-6 border border-sky-100 dark:border-gray-700 bg-gradient-to-r from-sky-50 to-white dark:from-gray-800 dark:to-gray-900 pop-in" style={{ animationDelay: "0.6s" }}>
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Começar a usar o Dr. Fácil</h3>
-                <p className="text-gray-600 mt-1">Configure seu perfil e comece a explorar todos os recursos do sistema.</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Começar a usar o Dr. Fácil</h3>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Configure seu perfil e comece a explorar todos os recursos do sistema.</p>
               </div>
               <Button className="shrink-0" onClick={() => navigate("/settings/profile")}>Configurar Perfil</Button>
             </div>

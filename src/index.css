@@ -188,7 +188,7 @@
 
 /* Healthcare-specific styles */
 .vital-sign-card {
-  @apply bg-white rounded-lg shadow-sm p-5 border border-gray-100 hover:border-primary-300 transition-all duration-300 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-primary-600;
+  @apply bg-white rounded-lg shadow-sm p-5 border border-gray-100 hover:border-primary-300 transition-all duration-300 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-primary-500;
 }
 
 .stat-value {
