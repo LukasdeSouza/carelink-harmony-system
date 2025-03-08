@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger
 } from "@/components/ui/sidebar";
 import {
   BarChart3,
@@ -25,10 +26,14 @@ import {
   Receipt,
   CalendarRange,
   Bot,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFlow } from "@/contexts/FlowContext";
 import { UserRole } from "@/contexts/FlowContext";
+import { useSidebar } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 
 const menuItemsByRole: Record<UserRole, Record<'clinical' | 'administrative', {
   title: string;
@@ -163,6 +168,7 @@ const menuItemsByRole: Record<UserRole, Record<'clinical' | 'administrative', {
 export function MainSidebar() {
   const navigate = useNavigate();
   const { selectedFlow, setSelectedFlow, userRole } = useFlow();
+  const { toggleSidebar, state } = useSidebar();
 
   const handleLogout = () => {
     setSelectedFlow(null);
@@ -184,14 +190,21 @@ export function MainSidebar() {
   return (
     <Sidebar className="w-72 border-r border-sky-100 dark:border-gray-700">
       <SidebarHeader className="p-5 border-b border-sky-100 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div className="flex items-center gap-3 text-primary-700 dark:text-primary-400">
-          <div className="bg-primary-50 dark:bg-primary-900/30 p-2 rounded-full">
-            <Stethoscope className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 text-primary-700 dark:text-primary-400">
+            <div className="bg-primary-50 dark:bg-primary-900/30 p-2 rounded-full">
+              <Stethoscope className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">Dr. Fácil</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{selectedFlow === 'clinical' ? 'Sistema Clínico' : 'Sistema Administrativo'}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold">Dr. Fácil</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{selectedFlow === 'clinical' ? 'Sistema Clínico' : 'Sistema Administrativo'}</p>
-          </div>
+          <SidebarTrigger>
+            <Button variant="ghost" size="icon" className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+              {state === "expanded" ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+            </Button>
+          </SidebarTrigger>
         </div>
       </SidebarHeader>
       <SidebarContent className="bg-white dark:bg-gray-800">
