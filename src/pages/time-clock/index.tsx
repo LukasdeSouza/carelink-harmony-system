@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClockInButton } from "@/components/time-clock/ClockInButton";
 import { TimeClockCalendar } from "@/components/time-clock/TimeClockCalendar";
 import { TimeClockList } from "@/components/time-clock/TimeClockList";
 import { TimeClockEntry, TimeClockEntryType, WorkDay } from "@/types/time-clock";
@@ -16,11 +15,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useFlow } from "@/contexts/FlowContext";
-import { Clock } from "lucide-react";
+import { 
+  Clock, 
+  Coffee, 
+  LogIn, 
+  LogOut, 
+  Sun, 
+  Moon, 
+  TimerOff,
+  Timer
+} from "lucide-react";
+import { ClockInButton } from "@/components/time-clock/ClockInButton";
 
 const TimeClock = () => {
   const [workDays, setWorkDays] = useState<WorkDay[]>([]);
@@ -76,8 +84,9 @@ const TimeClock = () => {
         
         groupedByDate[date].push({
           id: entry.id,
-          usuario_id: entry.usuario_id || userId || "",
-          type: entry.type,
+          userId: entry.usuario_id || userId || "",
+          userName: entry.usuario_nome || "Usuário",
+          type: entry.tipo,
           timestamp: entry.created_at,
           location: {
             latitude: entry.lat || 0,
@@ -89,6 +98,7 @@ const TimeClock = () => {
       const formattedWorkDays: WorkDay[] = Object.keys(groupedByDate).map(date => ({
         id: date,
         userId: userData.user?.id || "",
+        userName: "Usuário",
         date,
         entries: groupedByDate[date],
       }));
@@ -136,7 +146,6 @@ const TimeClock = () => {
           local_registro: `lat${coords.latitude}, long${coords.longitude})`,
         }
       ]);
-      console.log(data);
       
       if (error) {
         console.error("Error registering time clock:", error);
@@ -172,12 +181,40 @@ const TimeClock = () => {
     }
   };
 
+  // Agrupar os tipos de pontos por categoria para facilitar visualização
+  const clockInCategories = [
+    {
+      title: "Jornada de Trabalho",
+      items: [
+        { type: "ENTRADA", label: "Registrar Entrada", icon: <LogIn size={16} /> },
+        { type: "SAIDA", label: "Registrar Saída", icon: <LogOut size={16} /> },
+      ]
+    },
+    {
+      title: "Refeições",
+      items: [
+        { type: "ALMOCO", label: "Início do Almoço", icon: <Coffee size={16} /> },
+        { type: "VOLTA_ALMOCO", label: "Retorno do Almoço", icon: <Clock size={16} /> },
+        { type: "JANTA", label: "Início da Janta", icon: <Moon size={16} /> },
+        { type: "VOLTA_JANTA", label: "Retorno da Janta", icon: <Clock size={16} /> },
+      ]
+    },
+    {
+      title: "Pausas",
+      items: [
+        { type: "CAFE", label: "Início do Café", icon: <Coffee size={16} /> },
+        { type: "VOLTA_CAFE", label: "Retorno do Café", icon: <Clock size={16} /> },
+        { type: "INTERVALO", label: "Intervalo Rápido", icon: <TimerOff size={16} /> },
+      ]
+    }
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">Ponto Eletrônico</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Ponto Eletrônico</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Card className="p-6">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent>
               <DialogHeader>
@@ -198,78 +235,41 @@ const TimeClock = () => {
               </DialogFooter>
             </DialogContent>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Button 
-                onClick={() => handleOpenClockInDialog("ENTRADA")}
-                className="flex items-center justify-center gap-2"
-              >
-                <Clock size={18} />
-                Registrar Entrada
-              </Button>
-              <Button 
-                onClick={() => handleOpenClockInDialog("ALMOCO")}
-                className="flex items-center justify-center gap-2"
-              >
-                <Clock size={18} />
-                Início do Almoço
-              </Button>
-              <Button 
-                onClick={() => handleOpenClockInDialog("VOLTA_ALMOCO")}
-                className="flex items-center justify-center gap-2"
-              >
-                <Clock size={18} />
-                Fim do Almoço
-              </Button>
-              <Button 
-                onClick={() => handleOpenClockInDialog("CAFE")}
-                className="flex items-center justify-center gap-2"
-              >
-                <Clock size={18} />
-                Início Café da Tarde
-              </Button>
-              <Button 
-                onClick={() => handleOpenClockInDialog("VOLTA_CAFE")}
-                className="flex items-center justify-center gap-2"
-              >
-                <Clock size={18} />
-                Fim Café da Tarde
-              </Button>
-              <Button 
-                onClick={() => handleOpenClockInDialog("INTERVALO")}
-                className="flex items-center justify-center gap-2"
-              >
-                <Clock size={18} />
-                Intervalo 5 Minutos
-              </Button>
-              <Button 
-                onClick={() => handleOpenClockInDialog("JANTA")}
-                className="flex items-center justify-center gap-2"
-              >
-                <Clock size={18} />
-                Início Janta
-              </Button>
-              <Button 
-                onClick={() => handleOpenClockInDialog("VOLTA_JANTA")}
-                className="flex items-center justify-center gap-2"
-              >
-                <Clock size={18} />
-                Volta Janta
-              </Button>
-              <Button 
-                onClick={() => handleOpenClockInDialog("SAIDA")}
-                className="flex items-center justify-center gap-2"
-              >
-                <Clock size={18} />
-                Registrar Saída
-              </Button>
+            <div className="mb-6">
+              <h2 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">Registrar ponto</h2>
+              
+              {clockInCategories.map((category, index) => (
+                <div key={index} className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{category.title}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {category.items.map((item) => (
+                      <Button 
+                        key={item.type}
+                        onClick={() => handleOpenClockInDialog(item.type as TimeClockEntryType)}
+                        className="flex items-center justify-start text-left h-auto py-3 px-4"
+                        variant="outline"
+                      >
+                        <div className="flex items-center">
+                          <div className="mr-3 text-primary">
+                            {item.icon}
+                          </div>
+                          <div>
+                            <p className="font-medium">{item.label}</p>
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </Dialog>
-        </div>
+        </Card>
 
         <Tabs defaultValue="list" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="list">Lista</TabsTrigger>
-            <TabsTrigger value="calendar">Calendário</TabsTrigger>
+          <TabsList className="bg-gray-100 dark:bg-gray-800">
+            <TabsTrigger value="list" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">Lista</TabsTrigger>
+            <TabsTrigger value="calendar" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">Calendário</TabsTrigger>
           </TabsList>
 
           <TabsContent value="list">
