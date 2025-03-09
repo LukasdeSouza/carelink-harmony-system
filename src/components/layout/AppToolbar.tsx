@@ -1,24 +1,23 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Bell, Menu, Settings, LogOut, UserCircle } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
 import { useFlow } from "@/contexts/FlowContext";
-import { Bell, Settings, User, LogOut } from "lucide-react";
-import { getInitials } from "@/utils/string-utils";
 
 export function AppToolbar() {
   const navigate = useNavigate();
-  const { currentUser, setSelectedFlow } = useFlow();
-  const [notifications] = useState(3); // For demonstration, we'll show 3 notifications
-
+  const { setSelectedFlow } = useFlow();
+  
   const handleLogout = () => {
     setSelectedFlow(null);
     localStorage.removeItem("drfacil.auth.token");
@@ -27,60 +26,56 @@ export function AppToolbar() {
     navigate("/login");
   };
 
-  const getAvatarImage = () => {
-    if (currentUser?.profilePicture) {
-      return currentUser.profilePicture;
-    }
-    return null;
-  };
-
   return (
-    <header className="bg-white border-b border-sky-100 sticky top-0 z-10">
-      <div className="flex items-center justify-end h-16 px-6">
-        {/* Notifications */}
-        <button className="relative p-2 rounded-full text-gray-600 hover:bg-gray-100 transition-colors mr-2">
-          <Bell size={20} />
-          {notifications > 0 && (
-            <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              {notifications}
-            </span>
-          )}
-        </button>
-
-        {/* User Avatar with Dropdown */}
+    <div className="flex items-center justify-between h-16 px-4 border-b bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+      <div className="flex items-center gap-3">
+        <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Dr. Fácil</h1>
+      </div>
+      <div className="flex items-center gap-4">
+        <ThemeToggle />
+        <Button variant="ghost" size="icon" className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+          <Bell className="h-5 w-5" />
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors">
-              <Avatar className="h-8 w-8 cursor-pointer">
-                <AvatarImage src={getAvatarImage()} alt={currentUser?.name || "User"} />
-                <AvatarFallback className="bg-primary-100 text-primary-700">
-                  {currentUser?.name ? getInitials(currentUser.name) : "U"}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-medium text-gray-700 hidden md:inline-block">
-                {currentUser?.name || "Usuário"}
-              </span>
-            </button>
+            <Avatar className="h-8 w-8 border border-gray-200 dark:border-gray-600 cursor-pointer hover:ring-2 hover:ring-primary-200 dark:hover:ring-primary-700 transition-all duration-200">
+              <AvatarImage src="" />
+              <AvatarFallback className="bg-sky-100 text-sky-800 dark:bg-gray-700 dark:text-sky-300">US</AvatarFallback>
+            </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/settings/profile")} className="cursor-pointer">
-              <User className="mr-2 h-4 w-4" />
+          <DropdownMenuContent align="end" className="w-56 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">Usuário</p>
+                <p className="text-xs leading-none text-muted-foreground dark:text-gray-400">usuario@drfacil.com.br</p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="dark:bg-gray-700" />
+            <DropdownMenuItem 
+              className="cursor-pointer dark:hover:bg-gray-700 dark:focus:bg-gray-700"
+              onClick={() => navigate('/settings/profile')}
+            >
+              <UserCircle className="mr-2 h-4 w-4" />
               <span>Perfil</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+            <DropdownMenuItem 
+              className="cursor-pointer dark:hover:bg-gray-700 dark:focus:bg-gray-700"
+              onClick={() => navigate('/settings')}
+            >
               <Settings className="mr-2 h-4 w-4" />
               <span>Configurações</span>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
+            <DropdownMenuSeparator className="dark:bg-gray-700" />
+            <DropdownMenuItem 
+              className="cursor-pointer text-red-600 dark:text-red-400 dark:hover:bg-gray-700 dark:focus:bg-gray-700"
+              onClick={handleLogout}
+            >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Sair</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </header>
+    </div>
   );
 }

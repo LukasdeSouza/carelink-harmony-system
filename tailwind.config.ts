@@ -55,6 +55,8 @@ export default {
         muted: {
           DEFAULT: "#f1f5f9",
           foreground: "#64748b",
+          dark: "#1f2937",
+          "dark-foreground": "#9ca3af",
         },
         accent: {
           DEFAULT: "#90CAF9",
@@ -63,10 +65,14 @@ export default {
         card: {
           DEFAULT: "#ffffff",
           foreground: "#1e293b",
+          dark: "#1e293b",
+          "dark-foreground": "#f8fafc",
         },
         popover: {
           DEFAULT: "#ffffff",
           foreground: "#1e293b",
+          dark: "#1e293b", 
+          "dark-foreground": "#f8fafc",
         },
         background: "#ffffff",
         foreground: "#1e293b",
