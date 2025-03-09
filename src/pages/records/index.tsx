@@ -93,9 +93,9 @@ const Records = () => {
       try {
         // First, fetch all prontuarios
         const { data: recordsData, error: recordsError } = await supabase
-          .from("prontuarios")
+          .from("prontuario")
           .select("*")
-          .order("dateTime", { ascending: false });
+          .order("data_hora", { ascending: false });
 
         if (recordsError) throw recordsError;
 
@@ -155,7 +155,7 @@ const Records = () => {
     setUrinaryObservations("");
     setIntestinalStatus([]);
     setIntestinalObservations("");
-    setHydrationAmount("");
+    setHydrationAmount("0");
     setHydrationObservations("");
     setGeneralNotes("");
     setFormStep(0);
@@ -169,42 +169,28 @@ const Records = () => {
 
     try {
       const newRecord = {
-        patientId: selectedPatient,
-        dateTime: recordDate,
-        vitalSigns: {
-          bloodPressure,
-          spO2: spO2 === "" ? null : Number(spO2),
-          temperature: temperature === "" ? null : Number(temperature),
-          respiratoryRate: respiratoryRate === "" ? null : Number(respiratoryRate),
-          heartRate: heartRate === "" ? null : Number(heartRate)
-        },
-        orientation,
-        consciousness,
-        emotionalState,
-        nutrition: {
-          type: nutritionType,
-          acceptance: nutritionAcceptance,
-          observations: nutritionObservations
-        },
-        elimination: {
-          urinary: {
-            status: urinaryStatus,
-            observations: urinaryObservations
-          },
-          intestinal: {
-            status: intestinalStatus,
-            observations: intestinalObservations
-          }
-        },
-        hydration: {
-          amount: hydrationAmount,
-          observations: hydrationObservations
-        },
-        generalNotes
+        paciente_id: selectedPatient,
+        data_hora: recordDate,
+        pressao_arterial: bloodPressure,
+        sp02: spO2 === "" ? null : Number(spO2),
+        temperatura: temperature === "" ? null : Number(temperature),
+        frequencia_respiratoria: respiratoryRate === "" ? null : Number(respiratoryRate),
+        frequencia_cardiaca: heartRate === "" ? null : Number(heartRate),
+        orientacao: orientation,
+        consciencia: consciousness,
+        estado_emocional: emotionalState,
+        nutricao: nutritionType,
+        observacoes_nutricao: nutritionObservations,
+        eliminacao_urinaria: urinaryStatus,
+        observacoes_eliminacao_urinaria: urinaryObservations,
+        eliminacao_intestinal: intestinalStatus,
+        observacoes_eliminacao_intestinal: intestinalObservations,
+        quantidade_hidratacao: parseInt(hydrationAmount),
+        observacoes_gerais: generalNotes
       };
 
       const { data, error } = await supabase
-        .from("prontuarios")
+        .from("prontuario")
         .insert([newRecord])
         .select()
         .single();
@@ -577,11 +563,11 @@ const Records = () => {
                           <SelectValue placeholder="Quantidade" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="0-250">0 a 250ml</SelectItem>
-                          <SelectItem value="250-500">250 a 500ml</SelectItem>
-                          <SelectItem value="500-1000">500 a 1000ml</SelectItem>
-                          <SelectItem value="2000+">Até 2 litros</SelectItem>
-                          <SelectItem value="absent">Ausente</SelectItem>
+                          <SelectItem value={"250"}>0 a 250ml</SelectItem>
+                          <SelectItem value={"500"}>250 a 500ml</SelectItem>
+                          <SelectItem value={"1000"}>500 a 1000ml</SelectItem>
+                          <SelectItem value={"2000"}>Até 2 litros</SelectItem>
+                          <SelectItem value={"0"}>Ausente</SelectItem>
                         </SelectContent>
                       </Select>
                       <div>
