@@ -134,3 +134,17 @@
     background-position: 200% 0;
   }
 }
+
+/* Fade in animation */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

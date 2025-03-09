@@ -1,7 +1,7 @@
 
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Sheet,
   SheetContent,
@@ -11,23 +11,31 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { MedicalRecord } from "@/types/medical-record";
 import { Patient } from "@/types/staff";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Search, PlusCircle, FileEdit, Loader2, ChevronRight, ChevronLeft } from "lucide-react";
+import { 
+  Search, PlusCircle, FileText, Loader2, 
+  FilePlus2, User, ClipboardList, Calendar, ActivitySquare,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { RecordFormSteps } from "@/components/records/RecordFormSteps";
+import { RecordListItem } from "@/components/records/RecordListItem";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "recharts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@radix-ui/react-select";
+import { Checkbox } from "@radix-ui/react-checkbox";
+import { Textarea } from "@/components/ui/textarea";
 
 const Records = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,7 +71,9 @@ const Records = () => {
   // Multi-step form state
   const [formStep, setFormStep] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
-
+  const [currentView, setCurrentView] = useState<'list' | 'dashboard'>('list');
+  const [loading, setLoading] = useState(true);
+  
   // Fetch patients from Supabase
   useEffect(() => {
     const fetchPatients = async () => {
@@ -90,6 +100,7 @@ const Records = () => {
   // Fetch records from Supabase
   useEffect(() => {
     const fetchRecords = async () => {
+      setLoading(true);
       try {
         // First, fetch all prontuarios
         const { data: recordsData, error: recordsError } = await supabase
@@ -101,6 +112,7 @@ const Records = () => {
 
         if (!recordsData || recordsData.length === 0) {
           setRecords([]);
+          setLoading(false);
           return;
         }
 
@@ -131,6 +143,8 @@ const Records = () => {
       } catch (error: any) {
         console.error("Error fetching records:", error);
         toast.error("Erro ao carregar prontuários: " + error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -159,6 +173,7 @@ const Records = () => {
     setHydrationObservations("");
     setGeneralNotes("");
     setFormStep(0);
+    setFormOpen(false);
   };
 
   const handleCreateRecord = async () => {
@@ -206,7 +221,6 @@ const Records = () => {
 
       setRecords(recordWithPatientName);
       resetForm();
-      setFormOpen(false);
       toast.success("Registro médico criado com sucesso!");
     } catch (error: any) {
       console.error("Error creating record:", error);
@@ -225,6 +239,10 @@ const Records = () => {
       setFormStep(formStep - 1);
     }
   };
+
+  const filteredRecords = records.filter(record => 
+    record.patientName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <AppLayout>
@@ -602,81 +620,287 @@ const Records = () => {
               </div>
             </SheetContent>
           </Sheet>
+          <div className="flex items-center gap-2">
+            <FileText className="w-8 h-8" />
+            <h1 className="text-3xl font-bold text-gray-900">Prontuários</h1>
+          </div>
+          <Button onClick={() => setFormOpen(true)}>
+            <FilePlus2 className="mr-2 h-4 w-4" />
+            Novo Registro
+          </Button>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Buscar prontuários..."
+              placeholder="Buscar paciente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
+              className="pl-8"
             />
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="gap-1">
+              <User size={14} />
+              Pacientes: {patients.length}
+            </Badge>
+            <Badge variant="outline" className="gap-1">
+              <ClipboardList size={14} />
+              Registros: {records.length}
+            </Badge>
           </div>
         </div>
 
         <Tabs defaultValue="list" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="list">Lista</TabsTrigger>
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsList className="grid w-full sm:w-auto grid-cols-2 sm:inline-flex">
+            <TabsTrigger value="list" onClick={() => setCurrentView('list')}>
+              <ClipboardList className="mr-2 h-4 w-4" />
+              Lista
+            </TabsTrigger>
+            <TabsTrigger value="dashboard" onClick={() => setCurrentView('dashboard')}>
+              <ActivitySquare className="mr-2 h-4 w-4" />
+              Dashboard
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="list">
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {records.length === 0 ? (
-                    <p className="text-center text-gray-500">
-                      Nenhum registro médico encontrado.
-                    </p>
-                  ) : (
-                    records
-                      .filter((record) =>
-                        record.patientName
-                          .toLowerCase()
-                          .includes(searchTerm.toLowerCase())
-                      )
-                      .map((record) => (
-                        <div
-                          key={record.id}
-                          className="flex items-center justify-between p-4 border rounded-lg"
-                        >
-                          <div>
-                            <h3 className="font-semibold">{record.patientName}</h3>
-                            <p className="text-sm text-gray-500">
-                              {new Date(record.dateTime).toLocaleDateString()}{" "}
-                              {new Date(record.dateTime).toLocaleTimeString()}
-                            </p>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setSelectedRecord(record)}
-                          >
-                            <FileEdit className="h-4 w-4" />
-                          </Button>
+          <TabsContent value="list" className="space-y-4">
+            {loading ? (
+              <div className="grid gap-4">
+                {[1, 2, 3].map(i => (
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="rounded-full bg-gray-200 h-10 w-10"></div>
+                        <div className="space-y-2 flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/4"></div>
                         </div>
-                      ))
-                  )}
+                        <div className="h-8 bg-gray-200 rounded w-20"></div>
+                      </div>
+                      <div className="mt-3 grid grid-cols-4 gap-2">
+                        {[1, 2, 3, 4].map(j => (
+                          <div key={j} className="h-10 bg-gray-100 rounded"></div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredRecords.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="mx-auto h-12 w-12 text-gray-400 mb-4">
+                  <ClipboardList size={48} />
                 </div>
-              </CardContent>
-            </Card>
+                <h3 className="text-lg font-medium text-gray-900 mb-1">Nenhum prontuário encontrado</h3>
+                <p className="text-sm text-gray-500">
+                  {searchTerm ? "Tente ajustar sua busca ou " : ""}
+                  crie um novo registro de prontuário.
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => setFormOpen(true)}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Criar Registro
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {filteredRecords.map((record) => (
+                  <RecordListItem 
+                    key={record.id} 
+                    record={record} 
+                    onView={() => setSelectedRecord(record)} 
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="dashboard">
             <Card>
-              <CardHeader>
-                <CardTitle>Métricas e Histórico</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-gray-500">
-                  Dashboard em desenvolvimento...
-                </p>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Estatísticas de registros</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <div className="text-blue-500 mb-1">Últimos 7 dias</div>
+                        <div className="text-2xl font-bold">
+                          {records.filter(r => {
+                            const date = new Date(r.dateTime);
+                            const now = new Date();
+                            const diff = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+                            return diff <= 7;
+                          }).length}
+                        </div>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <div className="text-green-500 mb-1">Este mês</div>
+                        <div className="text-2xl font-bold">
+                          {records.filter(r => {
+                            const date = new Date(r.dateTime);
+                            const now = new Date();
+                            return date.getMonth() === now.getMonth() && 
+                                   date.getFullYear() === now.getFullYear();
+                          }).length}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg">
+                    <div className="text-center">
+                      <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                      <h3 className="text-lg font-medium mb-1">Visualização de calendário</h3>
+                      <p className="text-sm text-gray-500">
+                        Visualização de calendário em desenvolvimento
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
+
+      <Sheet open={formOpen} onOpenChange={setFormOpen}>
+        <SheetContent className="w-full sm:max-w-md md:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Novo Registro Médico</SheetTitle>
+          </SheetHeader>
+          
+          <div className="grid gap-4 py-4">
+            <RecordFormSteps
+              formStep={formStep}
+              selectedPatient={selectedPatient}
+              recordDate={recordDate}
+              bloodPressure={bloodPressure}
+              spO2={spO2}
+              temperature={temperature}
+              respiratoryRate={respiratoryRate}
+              heartRate={heartRate}
+              orientation={orientation}
+              consciousness={consciousness}
+              emotionalState={emotionalState}
+              nutritionType={nutritionType}
+              nutritionAcceptance={nutritionAcceptance}
+              nutritionObservations={nutritionObservations}
+              urinaryStatus={urinaryStatus}
+              urinaryObservations={urinaryObservations}
+              intestinalStatus={intestinalStatus}
+              intestinalObservations={intestinalObservations}
+              hydrationAmount={hydrationAmount}
+              hydrationObservations={hydrationObservations}
+              generalNotes={generalNotes}
+              loadingPatients={loadingPatients}
+              patients={patients}
+              setSelectedPatient={setSelectedPatient}
+              setRecordDate={setRecordDate}
+              setBloodPressure={setBloodPressure}
+              setSpO2={setSpO2}
+              setTemperature={setTemperature}
+              setRespiratoryRate={setRespiratoryRate}
+              setHeartRate={setHeartRate}
+              setOrientation={setOrientation}
+              setConsciousness={setConsciousness}
+              setEmotionalState={setEmotionalState}
+              setNutritionType={setNutritionType}
+              setNutritionAcceptance={setNutritionAcceptance}
+              setNutritionObservations={setNutritionObservations}
+              setUrinaryStatus={setUrinaryStatus}
+              setUrinaryObservations={setUrinaryObservations}
+              setIntestinalStatus={setIntestinalStatus}
+              setIntestinalObservations={setIntestinalObservations}
+              setHydrationAmount={setHydrationAmount}
+              setHydrationObservations={setHydrationObservations}
+              setGeneralNotes={setGeneralNotes}
+              prevStep={prevStep}
+              nextStep={nextStep}
+              resetForm={resetForm}
+              handleCreateRecord={handleCreateRecord}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Dialog open={!!selectedRecord} onOpenChange={(open) => !open && setSelectedRecord(null)}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Prontuário</DialogTitle>
+          </DialogHeader>
+          
+          {selectedRecord && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Paciente</h3>
+                  <p>{selectedRecord.patientName}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Data e Hora</h3>
+                  <p>{new Date(selectedRecord.dateTime).toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">Sinais Vitais</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-gray-50 p-2 rounded">
+                    <div className="text-xs text-gray-500">Pressão</div>
+                    <div>{selectedRecord.vitalSigns?.bloodPressure || "N/A"}</div>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded">
+                    <div className="text-xs text-gray-500">SpO2</div>
+                    <div>{selectedRecord.vitalSigns?.spO2 || "N/A"}%</div>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded">
+                    <div className="text-xs text-gray-500">Temperatura</div>
+                    <div>{selectedRecord.vitalSigns?.temperature || "N/A"}°C</div>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded">
+                    <div className="text-xs text-gray-500">FC</div>
+                    <div>{selectedRecord.vitalSigns?.heartRate || "N/A"} bpm</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">Estado</h3>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">
+                    {selectedRecord.orientation === "oriented" ? "Orientado" : "Desorientado"}
+                  </Badge>
+                  <Badge variant="outline">
+                    {selectedRecord.consciousness === "conscious" ? "Consciente" : 
+                     selectedRecord.consciousness === "drowsy" ? "Sonolento" :
+                     selectedRecord.consciousness === "alert" ? "Alerta" : "Letárgico"}
+                  </Badge>
+                </div>
+              </div>
+              
+              {selectedRecord.generalNotes && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Observações Gerais</h3>
+                  <p className="text-sm">{selectedRecord.generalNotes}</p>
+                </div>
+              )}
+              
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setSelectedRecord(null)}
+              >
+                Fechar
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
