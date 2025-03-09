@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -22,9 +22,8 @@ import { Procedure } from "@/types/procedures";
 import { Staff } from "@/types/staff";
 import { Patient } from "@/types/staff";
 import { toast } from "sonner";
-import { Pencil, Trash, ClipboardList } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +34,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ProcedureListItem } from "@/components/procedures/ProcedureListItem";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 export default function Procedures() {
   const [procedures, setProcedures] = useState<Procedure[]>([]);
@@ -44,6 +46,7 @@ export default function Procedures() {
   const [isLoading, setIsLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [procedureToDelete, setProcedureToDelete] = useState<Procedure | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const loadData = async () => {
     try {
@@ -142,6 +145,18 @@ export default function Procedures() {
     return doctor ? doctor.nome : "Médico não encontrado";
   };
 
+  const filteredProcedures = procedures.filter(procedure => {
+    const patientName = findPatientName(procedure.paciente_id);
+    const doctorName = findDoctorName(procedure.medico_id);
+    const searchLower = searchTerm.toLowerCase();
+    
+    return (
+      patientName.toLowerCase().includes(searchLower) ||
+      doctorName.toLowerCase().includes(searchLower) ||
+      procedure.descricao.toLowerCase().includes(searchLower)
+    );
+  });
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -168,13 +183,44 @@ export default function Procedures() {
           </Dialog>
         </div>
 
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="flex-1">
+            <Input
+              placeholder="Buscar por paciente, médico ou descrição..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+          </div>
+          <div className="flex space-x-2">
+            <Badge variant="secondary">
+              Total: {procedures.length}
+            </Badge>
+          </div>
+        </div>
+
         <Card>
           {isLoading ? (
-            <div className="p-4">Carregando...</div>
+            <div className="p-8 flex justify-center items-center">
+              <div className="animate-pulse flex space-x-4">
+                <div className="rounded-full bg-slate-200 h-10 w-10"></div>
+                <div className="flex-1 space-y-6 py-1">
+                  <div className="h-2 bg-slate-200 rounded"></div>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="h-2 bg-slate-200 rounded col-span-2"></div>
+                      <div className="h-2 bg-slate-200 rounded col-span-1"></div>
+                    </div>
+                    <div className="h-2 bg-slate-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12"></TableHead>
                   <TableHead>Data/Hora</TableHead>
                   <TableHead>Paciente</TableHead>
                   <TableHead>Médico</TableHead>
@@ -185,58 +231,48 @@ export default function Procedures() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {procedures.map((procedure) => (
-                  <TableRow key={procedure.id}>
-                    <TableCell>
-                      {format(new Date(procedure.data_hora), "dd/MM/yyyy HH:mm")}
-                    </TableCell>
-                    <TableCell>{findPatientName(procedure.paciente_id)}</TableCell>
-                    <TableCell>{findDoctorName(procedure.medico_id)}</TableCell>
-                    <TableCell>{procedure.descricao}</TableCell>
-                    <TableCell>{procedure.plano_saude ? "Sim" : "Não"}</TableCell>
-                    <TableCell>R$ {procedure.valor.toFixed(2)}</TableCell>
-                    <TableCell className="flex gap-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setEditingProcedure(procedure)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[600px]">
-                          <DialogHeader>
-                            <DialogTitle>Editar Procedimento</DialogTitle>
-                          </DialogHeader>
-                          <ProcedureForm
-                            initialData={procedure}
-                            onSubmit={handleEditProcedure}
-                            onCancel={() => setEditingProcedure(null)}
-                            doctors={doctors}
-                            patients={patients}
-                          />
-                        </DialogContent>
-                      </Dialog>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => {
-                          setProcedureToDelete(procedure);
-                          setDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
+                {filteredProcedures.map((procedure) => (
+                  <ProcedureListItem
+                    key={procedure.id}
+                    procedure={procedure}
+                    patientName={findPatientName(procedure.paciente_id)}
+                    doctorName={findDoctorName(procedure.medico_id)}
+                    onEdit={() => setEditingProcedure(procedure)}
+                    onDelete={() => {
+                      setProcedureToDelete(procedure);
+                      setDeleteDialogOpen(true);
+                    }}
+                  />
+                ))}
+                {filteredProcedures.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                      Nenhum procedimento encontrado
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           )}
         </Card>
       </div>
+
+      <Dialog open={!!editingProcedure} onOpenChange={(open) => !open && setEditingProcedure(null)}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Editar Procedimento</DialogTitle>
+          </DialogHeader>
+          {editingProcedure && (
+            <ProcedureForm
+              initialData={editingProcedure}
+              onSubmit={handleEditProcedure}
+              onCancel={() => setEditingProcedure(null)}
+              doctors={doctors}
+              patients={patients}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
