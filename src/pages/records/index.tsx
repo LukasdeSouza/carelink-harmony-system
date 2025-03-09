@@ -31,7 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Records = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [records, setRecords] = useState<MedicalRecord[]>([]);
+  const [records, setRecords] = useState<any[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<string>("");
@@ -39,7 +39,7 @@ const Records = () => {
   const [recordDate, setRecordDate] = useState<string>(
     new Date().toISOString().slice(0, 16)
   );
-  
+
   // Form state
   const [bloodPressure, setBloodPressure] = useState("");
   const [spO2, setSpO2] = useState<number | "">("");
@@ -49,17 +49,17 @@ const Records = () => {
   const [orientation, setOrientation] = useState("");
   const [consciousness, setConsciousness] = useState("");
   const [emotionalState, setEmotionalState] = useState("");
-  const [nutritionType, setNutritionType] = useState<string[]>([]);
-  const [nutritionAcceptance, setNutritionAcceptance] = useState<string[]>([]);
+  const [nutritionType, setNutritionType] = useState<string>("");
+  const [nutritionAcceptance, setNutritionAcceptance] = useState<string>("");
   const [nutritionObservations, setNutritionObservations] = useState("");
-  const [urinaryStatus, setUrinaryStatus] = useState<string[]>([]);
+  const [urinaryStatus, setUrinaryStatus] = useState<string>("");
   const [urinaryObservations, setUrinaryObservations] = useState("");
-  const [intestinalStatus, setIntestinalStatus] = useState<string[]>([]);
+  const [intestinalStatus, setIntestinalStatus] = useState<string>("");
   const [intestinalObservations, setIntestinalObservations] = useState("");
   const [hydrationAmount, setHydrationAmount] = useState("");
   const [hydrationObservations, setHydrationObservations] = useState("");
   const [generalNotes, setGeneralNotes] = useState("");
-  
+
   // Multi-step form state
   const [formStep, setFormStep] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
@@ -106,7 +106,7 @@ const Records = () => {
 
         // Create a map of patient IDs
         const patientIds = [...new Set(recordsData.map(record => record.patientId))];
-        
+
         // Then fetch all related patients
         const { data: patientsData, error: patientsError } = await supabase
           .from("pacientes")
@@ -148,12 +148,12 @@ const Records = () => {
     setOrientation("");
     setConsciousness("");
     setEmotionalState("");
-    setNutritionType([]);
-    setNutritionAcceptance([]);
+    setNutritionType("");
+    setNutritionAcceptance("");
     setNutritionObservations("");
-    setUrinaryStatus([]);
+    setUrinaryStatus("");
     setUrinaryObservations("");
-    setIntestinalStatus([]);
+    setIntestinalStatus("");
     setIntestinalObservations("");
     setHydrationAmount("0");
     setHydrationObservations("");
@@ -196,7 +196,7 @@ const Records = () => {
         .single();
 
       if (error) throw error;
-      
+
       // Add the patient name to the record for display
       const patientName = patients.find(p => p.id === selectedPatient)?.nome || "Desconhecido";
       const recordWithPatientName = {
@@ -204,7 +204,7 @@ const Records = () => {
         patientName
       };
 
-      setRecords([recordWithPatientName, ...records]);
+      setRecords(recordWithPatientName);
       resetForm();
       setFormOpen(false);
       toast.success("Registro médico criado com sucesso!");
@@ -245,7 +245,7 @@ const Records = () => {
                   Preencha os dados do prontuário para o paciente selecionado
                 </SheetDescription>
               </SheetHeader>
-              
+
               <div className="grid gap-4 py-4">
                 {formStep === 0 && (
                   <div className="space-y-4">
@@ -275,14 +275,14 @@ const Records = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="record-date">Data e Hora</Label>
-                      <Input 
-                        id="record-date" 
-                        type="datetime-local" 
-                        value={recordDate} 
-                        onChange={(e) => setRecordDate(e.target.value)} 
+                      <Input
+                        id="record-date"
+                        type="datetime-local"
+                        value={recordDate}
+                        onChange={(e) => setRecordDate(e.target.value)}
                       />
                     </div>
 
@@ -291,45 +291,45 @@ const Records = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <Label>Pressão Arterial</Label>
-                          <Input 
-                            placeholder="120/80" 
-                            value={bloodPressure} 
-                            onChange={(e) => setBloodPressure(e.target.value)} 
+                          <Input
+                            placeholder="120/80"
+                            value={bloodPressure}
+                            onChange={(e) => setBloodPressure(e.target.value)}
                           />
                         </div>
                         <div>
                           <Label>SpO2 (%)</Label>
-                          <Input 
-                            type="number" 
-                            value={spO2} 
-                            onChange={(e) => setSpO2(e.target.value === "" ? "" : Number(e.target.value))} 
+                          <Input
+                            type="number"
+                            value={spO2}
+                            onChange={(e) => setSpO2(e.target.value === "" ? "" : Number(e.target.value))}
                           />
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
                         <div>
                           <Label>Temperatura (°C)</Label>
-                          <Input 
-                            type="number" 
-                            step="0.1" 
-                            value={temperature} 
-                            onChange={(e) => setTemperature(e.target.value === "" ? "" : Number(e.target.value))} 
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={temperature}
+                            onChange={(e) => setTemperature(e.target.value === "" ? "" : Number(e.target.value))}
                           />
                         </div>
                         <div>
                           <Label>Freq. Respiratória</Label>
-                          <Input 
-                            type="number" 
-                            value={respiratoryRate} 
-                            onChange={(e) => setRespiratoryRate(e.target.value === "" ? "" : Number(e.target.value))} 
+                          <Input
+                            type="number"
+                            value={respiratoryRate}
+                            onChange={(e) => setRespiratoryRate(e.target.value === "" ? "" : Number(e.target.value))}
                           />
                         </div>
                         <div>
                           <Label>Freq. Cardíaca</Label>
-                          <Input 
-                            type="number" 
-                            value={heartRate} 
-                            onChange={(e) => setHeartRate(e.target.value === "" ? "" : Number(e.target.value))} 
+                          <Input
+                            type="number"
+                            value={heartRate}
+                            onChange={(e) => setHeartRate(e.target.value === "" ? "" : Number(e.target.value))}
                           />
                         </div>
                       </div>
@@ -390,30 +390,30 @@ const Records = () => {
                         <Label>Tipo</Label>
                         <div className="space-y-2">
                           <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id="oral" 
+                            <Checkbox
+                              id="oral"
                               checked={nutritionType.includes("oral")}
                               onCheckedChange={(checked) => {
                                 setNutritionType(
-                                  checked 
-                                    ? [...nutritionType, "oral"] 
-                                    : nutritionType.filter(t => t !== "oral")
+                                  checked
+                                    ? "oral"
+                                    : "not-oral"
                                 );
-                              }} 
+                              }}
                             />
                             <label htmlFor="oral">Via Oral</label>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id="tube" 
+                            <Checkbox
+                              id="tube"
                               checked={nutritionType.includes("tube")}
                               onCheckedChange={(checked) => {
                                 setNutritionType(
-                                  checked 
-                                    ? [...nutritionType, "tube"] 
-                                    : nutritionType.filter(t => t !== "tube")
+                                  checked
+                                    ? "tube"
+                                    : "not-tube"
                                 );
-                              }} 
+                              }}
                             />
                             <label htmlFor="tube">Sonda</label>
                           </div>
@@ -423,30 +423,30 @@ const Records = () => {
                         <Label>Aceitação</Label>
                         <div className="space-y-2">
                           <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id="accepted" 
+                            <Checkbox
+                              id="accepted"
                               checked={nutritionAcceptance.includes("accepted")}
                               onCheckedChange={(checked) => {
                                 setNutritionAcceptance(
-                                  checked 
-                                    ? [...nutritionAcceptance, "accepted"] 
-                                    : nutritionAcceptance.filter(a => a !== "accepted")
+                                  checked
+                                    ? "accepted"
+                                    : "rejected"
                                 );
-                              }} 
+                              }}
                             />
                             <label htmlFor="accepted">Aceita</label>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id="rejected" 
+                            <Checkbox
+                              id="rejected"
                               checked={nutritionAcceptance.includes("rejected")}
                               onCheckedChange={(checked) => {
                                 setNutritionAcceptance(
-                                  checked 
-                                    ? [...nutritionAcceptance, "rejected"] 
-                                    : nutritionAcceptance.filter(a => a !== "rejected")
+                                  checked
+                                    ? "rejected"
+                                    : "not-rejected"
                                 );
-                              }} 
+                              }}
                             />
                             <label htmlFor="rejected">Rejeita</label>
                           </div>
@@ -455,8 +455,8 @@ const Records = () => {
                     </div>
                     <div>
                       <Label>Observações</Label>
-                      <Textarea 
-                        placeholder="Observações sobre nutrição" 
+                      <Textarea
+                        placeholder="Observações sobre nutrição"
                         value={nutritionObservations}
                         onChange={(e) => setNutritionObservations(e.target.value)}
                       />
@@ -472,82 +472,50 @@ const Records = () => {
                         <h4 className="font-medium mb-2">Urinária</h4>
                         <div className="flex space-x-4">
                           <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id="urinary-present" 
-                              checked={urinaryStatus.includes("present")}
+                            <Checkbox
+                              id="urinary-present"
+                              checked={urinaryStatus === "present"}
                               onCheckedChange={(checked) => {
-                                setUrinaryStatus(
-                                  checked 
-                                    ? [...urinaryStatus, "present"] 
-                                    : urinaryStatus.filter(s => s !== "present")
-                                );
-                              }} 
+                                setUrinaryStatus(checked ? "present" : null);
+                              }}
                             />
                             <label htmlFor="urinary-present">Presente</label>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id="urinary-absent" 
-                              checked={urinaryStatus.includes("absent")}
+                            <Checkbox
+                              id="urinary-absent"
+                              checked={urinaryStatus === "absent"}
                               onCheckedChange={(checked) => {
-                                setUrinaryStatus(
-                                  checked 
-                                    ? [...urinaryStatus, "absent"] 
-                                    : urinaryStatus.filter(s => s !== "absent")
-                                );
-                              }} 
+                                setUrinaryStatus(checked ? "absent" : null);
+                              }}
                             />
                             <label htmlFor="urinary-absent">Ausente</label>
                           </div>
-                        </div>
-                        <div className="mt-2">
-                          <Label>Observações</Label>
-                          <Textarea 
-                            placeholder="Observações" 
-                            value={urinaryObservations}
-                            onChange={(e) => setUrinaryObservations(e.target.value)}
-                          />
                         </div>
                       </div>
                       <div>
                         <h4 className="font-medium mb-2">Intestinal</h4>
                         <div className="flex space-x-4">
                           <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id="intestinal-present" 
-                              checked={intestinalStatus.includes("present")}
+                            <Checkbox
+                              id="intestinal-present"
+                              checked={intestinalStatus === "present"}
                               onCheckedChange={(checked) => {
-                                setIntestinalStatus(
-                                  checked 
-                                    ? [...intestinalStatus, "present"] 
-                                    : intestinalStatus.filter(s => s !== "present")
-                                );
-                              }} 
+                                setIntestinalStatus(checked ? "present" : "");
+                              }}
                             />
                             <label htmlFor="intestinal-present">Presente</label>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id="intestinal-absent" 
-                              checked={intestinalStatus.includes("absent")}
+                            <Checkbox
+                              id="intestinal-absent"
+                              checked={intestinalStatus === "absent"}
                               onCheckedChange={(checked) => {
-                                setIntestinalStatus(
-                                  checked 
-                                    ? [...intestinalStatus, "absent"] 
-                                    : intestinalStatus.filter(s => s !== "absent")
-                                );
-                              }} 
+                                setIntestinalStatus(checked ? "absent" : "");
+                              }}
                             />
                             <label htmlFor="intestinal-absent">Ausente</label>
                           </div>
-                        </div>
-                        <div className="mt-2">
-                          <Label>Observações</Label>
-                          <Textarea 
-                            placeholder="Observações" 
-                            value={intestinalObservations}
-                            onChange={(e) => setIntestinalObservations(e.target.value)}
-                          />
                         </div>
                       </div>
                     </div>
@@ -572,18 +540,18 @@ const Records = () => {
                       </Select>
                       <div>
                         <Label>Observações</Label>
-                        <Textarea 
-                          placeholder="Observações sobre hidratação" 
+                        <Textarea
+                          placeholder="Observações sobre hidratação"
                           value={hydrationObservations}
                           onChange={(e) => setHydrationObservations(e.target.value)}
                         />
                       </div>
                     </div>
-                    
+
                     <div className="pt-4">
                       <Label>Observações Gerais</Label>
-                      <Textarea 
-                        className="min-h-[100px]" 
+                      <Textarea
+                        className="min-h-[100px]"
                         value={generalNotes}
                         onChange={(e) => setGeneralNotes(e.target.value)}
                       />
@@ -605,7 +573,7 @@ const Records = () => {
                       Cancelar
                     </Button>
                   )}
-                  
+
                   {formStep < 3 ? (
                     <Button onClick={nextStep}>
                       Próximo
@@ -617,18 +585,17 @@ const Records = () => {
                     </Button>
                   )}
                 </div>
-                
+
                 <div className="flex justify-center items-center space-x-2 mt-4">
                   {[0, 1, 2, 3].map((step) => (
                     <div
                       key={step}
-                      className={`h-2 w-2 rounded-full ${
-                        formStep === step 
-                          ? "bg-primary" 
-                          : formStep > step 
-                            ? "bg-gray-400" 
-                            : "bg-gray-200"
-                      }`}
+                      className={`h-2 w-2 rounded-full ${formStep === step
+                        ? "bg-primary"
+                        : formStep > step
+                          ? "bg-gray-400"
+                          : "bg-gray-200"
+                        }`}
                     />
                   ))}
                 </div>
