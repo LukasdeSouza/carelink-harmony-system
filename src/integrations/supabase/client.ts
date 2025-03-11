@@ -18,6 +18,7 @@ export const getCurrentUser = async () => {
 };
 
 export const getUserProfile = async (userId: string) => {
+  // We need to specify the table name using type annotations to avoid TS errors
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
@@ -32,58 +33,115 @@ export const getUserProfile = async (userId: string) => {
   return data;
 };
 
-// Helper functions for data operations
-export const fetchData = async (table: string, options = {}) => {
-  const query = supabase.from(table).select('*');
-  const { data, error } = await query;
-  
-  if (error) {
-    console.error(`Error fetching data from ${table}:`, error);
-    return [];
+// Helper functions for data operations - updated to use generic types for better type safety
+export const fetchData = async <T>(table: string) => {
+  try {
+    // Using any here because we need to bypass TypeScript's type checking
+    // for dynamic table names
+    const query = (supabase.from(table as any) as any).select('*');
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error(`Error fetching data from ${table}:`, error);
+      return [] as T[];
+    }
+    
+    return (data || []) as T[];
+  } catch (error) {
+    console.error(`Error in fetchData for ${table}:`, error);
+    return [] as T[];
   }
-  
-  return data || [];
 };
 
-export const insertData = async (table: string, data: any) => {
-  const { data: result, error } = await supabase
-    .from(table)
-    .insert(data)
-    .select();
-  
-  if (error) {
-    console.error(`Error inserting data into ${table}:`, error);
+export const insertData = async <T>(table: string, data: any) => {
+  try {
+    // Using any here because we need to bypass TypeScript's type checking
+    // for dynamic table names
+    const { data: result, error } = await (supabase.from(table as any) as any)
+      .insert(data)
+      .select();
+    
+    if (error) {
+      console.error(`Error inserting data into ${table}:`, error);
+      throw error;
+    }
+    
+    return result as T[];
+  } catch (error) {
+    console.error(`Error in insertData for ${table}:`, error);
     throw error;
   }
-  
-  return result;
 };
 
-export const updateData = async (table: string, id: string, data: any) => {
-  const { data: result, error } = await supabase
-    .from(table)
-    .update(data)
-    .eq('id', id)
-    .select();
-  
-  if (error) {
-    console.error(`Error updating data in ${table}:`, error);
+export const updateData = async <T>(table: string, id: string, data: any) => {
+  try {
+    // Using any here because we need to bypass TypeScript's type checking
+    // for dynamic table names
+    const { data: result, error } = await (supabase.from(table as any) as any)
+      .update(data)
+      .eq('id', id)
+      .select();
+    
+    if (error) {
+      console.error(`Error updating data in ${table}:`, error);
+      throw error;
+    }
+    
+    return result as T[];
+  } catch (error) {
+    console.error(`Error in updateData for ${table}:`, error);
     throw error;
   }
-  
-  return result;
 };
 
 export const deleteData = async (table: string, id: string) => {
-  const { error } = await supabase
-    .from(table)
-    .delete()
-    .eq('id', id);
-  
-  if (error) {
-    console.error(`Error deleting data from ${table}:`, error);
+  try {
+    // Using any here because we need to bypass TypeScript's type checking
+    // for dynamic table names
+    const { error } = await (supabase.from(table as any) as any)
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error(`Error deleting data from ${table}:`, error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`Error in deleteData for ${table}:`, error);
     throw error;
   }
-  
-  return true;
+};
+
+// Special helper for medical records to ensure proper data formatting
+export const createMedicalRecord = async (recordData: any) => {
+  try {
+    // Ensure array fields are properly set as arrays
+    const formattedData = {
+      ...recordData,
+      // Convert string values to arrays where needed
+      nutricao: recordData.nutricao ? (Array.isArray(recordData.nutricao) ? recordData.nutricao : [recordData.nutricao]) : [],
+      eliminacao_urinaria: recordData.eliminacao_urinaria ? (Array.isArray(recordData.eliminacao_urinaria) ? recordData.eliminacao_urinaria : [recordData.eliminacao_urinaria]) : [],
+      eliminacao_intestinal: recordData.eliminacao_intestinal ? (Array.isArray(recordData.eliminacao_intestinal) ? recordData.eliminacao_intestinal : [recordData.eliminacao_intestinal]) : [],
+    };
+
+    // Log the formatted data to help with debugging
+    console.log('Formatted record data:', formattedData);
+
+    const { data, error } = await supabase
+      .from('prontuario')
+      .insert([formattedData])
+      .select();
+
+    if (error) {
+      console.error('Error creating medical record:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in createMedicalRecord:', error);
+    throw error;
+  }
 };
