@@ -10,14 +10,26 @@ interface PrivateRouteProps {
 
 export function PrivateRoute({ children }: PrivateRouteProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { userPermissions, userRole } = useFlow();
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1]; // Get first path segment
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
-    });
+    const checkAuth = async () => {
+      try {
+        setIsLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsAuthenticated(!!session);
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
@@ -28,9 +40,11 @@ export function PrivateRoute({ children }: PrivateRouteProps) {
     };
   }, []);
 
-  // Wait for initial authentication check
-  if (isAuthenticated === null) {
-    return null;
+  // Show loading state while checking authentication
+  if (isLoading || isAuthenticated === null) {
+    return <div className="flex items-center justify-center h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>;
   }
 
   if (!isAuthenticated) {
