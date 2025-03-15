@@ -1,10 +1,10 @@
 
 import { 
   Syringe, Pill, TestTube, Microscope, Stethoscope, 
-  Thermometer, Bone, Clipboard, Scissors, 
-  Lungs, Brain, Heart, Activity, BadgeAlert,
-  BandAid, Tablets, Beaker, PlusCircle, 
-  Pills, HeartPulse, Hospital, LucideIcon
+  Thermometer, Bone, Clipboard, Scissors, AirVent,
+  Brain, Heart, Activity, BadgeAlert, Bandage,
+  Tablets, Beaker, PlusCircle,
+  HeartPulse, Hospital, LucideIcon
 } from "lucide-react";
 
 export type MedicalIconType = {
@@ -20,16 +20,16 @@ const productIcons: MedicalIconType[] = [
   { icon: Microscope, color: "text-indigo-600", background: "bg-indigo-100" },
   { icon: Stethoscope, color: "text-red-600", background: "bg-red-100" },
   { icon: Thermometer, color: "text-orange-600", background: "bg-orange-100" },
-  { icon: BandAid, color: "text-pink-600", background: "bg-pink-100" },
+  { icon: Bandage, color: "text-pink-600", background: "bg-pink-100" },
   { icon: Beaker, color: "text-cyan-600", background: "bg-cyan-100" },
   { icon: Tablets, color: "text-emerald-600", background: "bg-emerald-100" },
-  { icon: Pills, color: "text-violet-600", background: "bg-violet-100" },
+  { icon: Pill, color: "text-violet-600", background: "bg-violet-100" },
 ];
 
 const procedureIcons: MedicalIconType[] = [
   { icon: Brain, color: "text-purple-600", background: "bg-purple-100" },
   { icon: Heart, color: "text-red-600", background: "bg-red-100" },
-  { icon: Lungs, color: "text-blue-600", background: "bg-blue-100" },
+  { icon: AirVent, color: "text-blue-600", background: "bg-blue-100" },
   { icon: Bone, color: "text-amber-600", background: "bg-amber-100" },
   { icon: Activity, color: "text-green-600", background: "bg-green-100" },
   { icon: Clipboard, color: "text-indigo-600", background: "bg-indigo-100" },
