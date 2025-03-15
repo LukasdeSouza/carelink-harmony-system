@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +21,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { createMedicalRecord, fetchData, supabase } from "@/integrations/supabase/client";
 import { RecordFormSteps } from "@/components/records/RecordFormSteps";
 import { RecordListItem } from "@/components/records/RecordListItem";
 import { Badge } from "@/components/ui/badge";
@@ -32,10 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "recharts";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@radix-ui/react-select";
-import { Checkbox } from "@radix-ui/react-checkbox";
-import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 const Records = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,12 +53,12 @@ const Records = () => {
   const [orientation, setOrientation] = useState("");
   const [consciousness, setConsciousness] = useState("");
   const [emotionalState, setEmotionalState] = useState("");
-  const [nutritionType, setNutritionType] = useState<string>("");
-  const [nutritionAcceptance, setNutritionAcceptance] = useState<string>("");
+  const [nutritionType, setNutritionType] = useState<string[]>([]);
+  const [nutritionAcceptance, setNutritionAcceptance] = useState<string[]>([]);
   const [nutritionObservations, setNutritionObservations] = useState("");
-  const [urinaryStatus, setUrinaryStatus] = useState<string>("");
+  const [urinaryStatus, setUrinaryStatus] = useState<string[]>([]);
   const [urinaryObservations, setUrinaryObservations] = useState("");
-  const [intestinalStatus, setIntestinalStatus] = useState<string>("");
+  const [intestinalStatus, setIntestinalStatus] = useState<string[]>([]);
   const [intestinalObservations, setIntestinalObservations] = useState("");
   const [hydrationAmount, setHydrationAmount] = useState("");
   const [hydrationObservations, setHydrationObservations] = useState("");
@@ -79,12 +75,7 @@ const Records = () => {
     const fetchPatients = async () => {
       setLoadingPatients(true);
       try {
-        const { data, error } = await supabase
-          .from("pacientes")
-          .select("*")
-          .order("nome");
-
-        if (error) throw error;
+        const data = await fetchData<Patient>("pacientes");
         setPatients(data || []);
       } catch (error: any) {
         console.error("Error fetching patients:", error);
@@ -103,12 +94,7 @@ const Records = () => {
       setLoading(true);
       try {
         // First, fetch all prontuarios
-        const { data: recordsData, error: recordsError } = await supabase
-          .from("prontuario")
-          .select("*")
-          .order("data_hora", { ascending: false });
-
-        if (recordsError) throw recordsError;
+        const recordsData = await fetchData<any>("prontuario");
 
         if (!recordsData || recordsData.length === 0) {
           setRecords([]);
@@ -117,26 +103,21 @@ const Records = () => {
         }
 
         // Create a map of patient IDs
-        const patientIds = [...new Set(recordsData.map(record => record.patientId))];
+        const patientIds = [...new Set(recordsData.map((record: any) => record.paciente_id))];
 
         // Then fetch all related patients
-        const { data: patientsData, error: patientsError } = await supabase
-          .from("pacientes")
-          .select("id, nome")
-          .in("id", patientIds);
-
-        if (patientsError) throw patientsError;
-
+        const patientsData = await fetchData<Patient>("pacientes");
+        
         // Create a map for quick patient lookups
-        const patientMap = (patientsData || []).reduce((map, patient) => {
+        const patientMap = (patientsData || []).reduce((map: any, patient: Patient) => {
           map[patient.id] = patient.nome;
           return map;
         }, {});
 
         // Combine the data
-        const formattedRecords = recordsData.map(record => ({
+        const formattedRecords = recordsData.map((record: any) => ({
           ...record,
-          patientName: patientMap[record.patientId] || "Paciente não encontrado"
+          patientName: patientMap[record.paciente_id] || "Paciente não encontrado"
         }));
 
         setRecords(formattedRecords);
@@ -162,14 +143,14 @@ const Records = () => {
     setOrientation("");
     setConsciousness("");
     setEmotionalState("");
-    setNutritionType("");
-    setNutritionAcceptance("");
+    setNutritionType([]);
+    setNutritionAcceptance([]);
     setNutritionObservations("");
-    setUrinaryStatus("");
+    setUrinaryStatus([]);
     setUrinaryObservations("");
-    setIntestinalStatus("");
+    setIntestinalStatus([]);
     setIntestinalObservations("");
-    setHydrationAmount("0");
+    setHydrationAmount("");
     setHydrationObservations("");
     setGeneralNotes("");
     setFormStep(0);
@@ -200,28 +181,27 @@ const Records = () => {
         observacoes_eliminacao_urinaria: urinaryObservations,
         eliminacao_intestinal: intestinalStatus,
         observacoes_eliminacao_intestinal: intestinalObservations,
-        quantidade_hidratacao: parseInt(hydrationAmount),
+        quantidade_hidratacao: hydrationAmount ? parseInt(hydrationAmount) : null,
+        observacoes_hidratacao: hydrationObservations,
         observacoes_gerais: generalNotes
       };
 
-      const { data, error } = await supabase
-        .from("prontuario")
-        .insert([newRecord])
-        .select()
-        .single();
+      console.log("Submitting record:", newRecord);
 
-      if (error) throw error;
+      const data = await createMedicalRecord(newRecord);
 
       // Add the patient name to the record for display
       const patientName = patients.find(p => p.id === selectedPatient)?.nome || "Desconhecido";
-      const recordWithPatientName = {
-        ...data,
-        patientName
-      };
+      if (data && data[0]) {
+        const recordWithPatientName = {
+          ...data[0],
+          patientName
+        };
 
-      setRecords(recordWithPatientName);
-      resetForm();
-      toast.success("Registro médico criado com sucesso!");
+        setRecords(prev => [recordWithPatientName, ...prev]);
+        resetForm();
+        toast.success("Registro médico criado com sucesso!");
+      }
     } catch (error: any) {
       console.error("Error creating record:", error);
       toast.error("Erro ao criar prontuário: " + error.message);
@@ -906,3 +886,4 @@ const Records = () => {
 };
 
 export default Records;
+
