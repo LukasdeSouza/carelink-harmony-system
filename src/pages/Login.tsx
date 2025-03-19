@@ -61,7 +61,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-50 to-white">
+    <div className="min-h-screen w-full flex items-center justify-center">
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-64 bg-primary-50 rounded-b-full opacity-50 transform -translate-y-1/2"></div>
         <div className="absolute bottom-0 right-0 w-full h-64 bg-primary-50 rounded-t-full opacity-50 transform translate-y-1/2"></div>

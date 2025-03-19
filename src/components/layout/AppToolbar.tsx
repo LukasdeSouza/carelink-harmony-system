@@ -53,7 +53,7 @@ export function AppToolbar() {
   return (
     <div className="flex items-center justify-between h-16 px-6 border-b bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
       <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap overflow-visible">Dr. Fácil</h1>
+        <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap overflow-visible"></h1>
       </div>
       <div className="flex items-center gap-4">
         <ThemeToggle />

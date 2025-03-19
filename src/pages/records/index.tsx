@@ -32,6 +32,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 
 const Records = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,12 +56,12 @@ const Records = () => {
   const [orientation, setOrientation] = useState("");
   const [consciousness, setConsciousness] = useState("");
   const [emotionalState, setEmotionalState] = useState("");
-  const [nutritionType, setNutritionType] = useState<string[]>([]);
-  const [nutritionAcceptance, setNutritionAcceptance] = useState<string[]>([]);
+  const [nutritionType, setNutritionType] = useState<string>("");
+  const [nutritionAcceptance, setNutritionAcceptance] = useState<string>("");
   const [nutritionObservations, setNutritionObservations] = useState("");
-  const [urinaryStatus, setUrinaryStatus] = useState<string[]>([]);
+  const [urinaryStatus, setUrinaryStatus] = useState<string>("");
   const [urinaryObservations, setUrinaryObservations] = useState("");
-  const [intestinalStatus, setIntestinalStatus] = useState<string[]>([]);
+  const [intestinalStatus, setIntestinalStatus] = useState<string>("");
   const [intestinalObservations, setIntestinalObservations] = useState("");
   const [hydrationAmount, setHydrationAmount] = useState("");
   const [hydrationObservations, setHydrationObservations] = useState("");
@@ -143,12 +146,12 @@ const Records = () => {
     setOrientation("");
     setConsciousness("");
     setEmotionalState("");
-    setNutritionType([]);
-    setNutritionAcceptance([]);
+    setNutritionType("");
+    setNutritionAcceptance("");
     setNutritionObservations("");
-    setUrinaryStatus([]);
+    setUrinaryStatus("");
     setUrinaryObservations("");
-    setIntestinalStatus([]);
+    setIntestinalStatus("");
     setIntestinalObservations("");
     setHydrationAmount("");
     setHydrationObservations("");
