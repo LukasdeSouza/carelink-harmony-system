@@ -74,7 +74,7 @@ const Index = () => {
           <div>
             <Badge className="w-fit pop-in mb-2" variant="secondary">Bem-vindo</Badge>
             <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 pop-in" style={{ animationDelay: "0.1s" }}>
-              Care Management System
+              Gestão de Clínicas
             </h1>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl pop-in" style={{ animationDelay: "0.2s" }}>
               Dashboard da clínica - Visão rápida das atividades e informações importantes

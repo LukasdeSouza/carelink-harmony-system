@@ -93,13 +93,13 @@ const Schedule = () => {
                         appt.date.getFullYear() === date.getFullYear()
                       ) ? (
                         <div className="space-y-2">
-                          <div className="p-3 bg-sky-50 rounded-lg border border-sky-100">
+                          <div className="p-3 bg-slate-800 rounded-lg border border-sky-50">
                             <p className="font-medium text-sky-900">Consulta - Dr. Silva</p>
                             <p className="text-sm text-sky-700">Paciente: João Costa</p>
                             <p className="text-sm text-sky-600">Horário: 09:00</p>
                           </div>
                           
-                          <div className="p-3 bg-sky-50 rounded-lg border border-sky-100">
+                          <div className="p-3 bg-slate-800 rounded-lg border border-sky-100">
                             <p className="font-medium text-sky-900">Exame - Raio X</p>
                             <p className="text-sm text-sky-700">Paciente: Maria Oliveira</p>
                             <p className="text-sm text-sky-600">Horário: 10:30</p>

@@ -334,17 +334,17 @@ export default function AIAssistant() {
         {"< voltar"}
       </a>
 
-      <div className="bg-white rounded-lg shadow-sm border p-4 min-h-[600px] flex flex-col">
+      <div className="rounded-lg shadow-sm border-slate-800 border p-4 min-h-[600px] flex flex-col">
         <div className="flex-1 overflow-y-auto space-y-4 mb-4">
           {messages.length === 0 ? (
             <div className="text-center text-gray-500 mt-8">
               <Bot className="w-12 h-12 mx-auto mb-4 text-primary-200" />
-              <p>Olá! Como posso ajudar você hoje?</p>
-              <p className="text-sm mt-2">
+              <p className="font-bold">Olá! Como posso ajudar você hoje?</p>
+              <p className="text-xs mt-2">
                 Experimente perguntar sobre análises financeiras, estatísticas de procedimentos
                 ou outras informações administrativas.
               </p>
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md max-w-md mx-auto">
+              <div className="mt-4 p-3 bg-slate-800 rounded-md max-w-md mx-auto">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5" />
                   <div>
