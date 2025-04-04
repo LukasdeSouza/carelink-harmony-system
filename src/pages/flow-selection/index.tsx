@@ -5,6 +5,7 @@ import { Stethoscope, LineChart, ArrowRight, HelpCircle } from "lucide-react";
 import { useFlow } from "@/contexts/FlowContext";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const FlowSelection = () => {
   const navigate = useNavigate();
@@ -15,10 +16,16 @@ const FlowSelection = () => {
     setLoading(flow);
     setSelectedFlow(flow);
     
-    // Simular tempo de carregamento para mostrar splash screen
-    setTimeout(() => {
-      navigate(flow === 'clinical' ? "/dashboard" : "/time-clock");
-    }, 1500);
+    try {
+      // Simular tempo de carregamento para mostrar splash screen
+      setTimeout(() => {
+        navigate(flow === 'clinical' ? "/dashboard" : "/time-clock");
+      }, 1500);
+    } catch (error) {
+      console.error("Erro ao navegar:", error);
+      toast.error("Erro ao carregar fluxo. Tente novamente.");
+      setLoading(null);
+    }
   };
 
   return (
@@ -56,7 +63,7 @@ const FlowSelection = () => {
         <div className="max-w-5xl w-full">
           <div className="text-center space-y-4 mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
-              Bem-vindo ao Sistema
+              Bem-vindo ao Dr. Fácil
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-lg mx-auto">
               Selecione o modo que deseja acessar para começar a trabalhar
