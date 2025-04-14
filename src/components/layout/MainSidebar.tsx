@@ -34,6 +34,7 @@ import { useFlow } from "@/contexts/FlowContext";
 import { UserRole } from "@/contexts/FlowContext";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 const menuItemsByRole: Record<UserRole, Record<'clinical' | 'administrative', {
   title: string;
@@ -170,6 +171,15 @@ export function MainSidebar() {
   const { selectedFlow, setSelectedFlow, userRole } = useFlow();
   const { toggleSidebar, state } = useSidebar();
 
+  // Definir um fluxo padrão para desenvolvimento se não houver nenhum
+  useEffect(() => {
+    if (!selectedFlow) {
+      setSelectedFlow("clinical");
+      localStorage.setItem("drfacil.flow", "clinical");
+      console.log("Fluxo padrão definido como 'clinical' no MainSidebar");
+    }
+  }, [selectedFlow, setSelectedFlow]);
+
   const handleLogout = () => {
     setSelectedFlow(null);
     localStorage.removeItem("drfacil.auth.token");
@@ -182,10 +192,11 @@ export function MainSidebar() {
     setSelectedFlow(null);
     navigate("/flow-selection");
   };
-
-  if (!userRole || !selectedFlow) return null;
-
-  const menuItems = menuItemsByRole[userRole.role][selectedFlow];
+  
+  // Definir userRole padrão para desenvolvimento se não existir
+  const role = userRole?.role || "admin";
+  const flow = selectedFlow || "clinical";
+  const menuItems = menuItemsByRole[role][flow];
 
   return (
     <Sidebar className="w-72 border-r border-sky-100 dark:border-gray-700">
@@ -197,7 +208,7 @@ export function MainSidebar() {
             </div>
             <div>
               <h2 className="text-lg font-semibold">Dr. Fácil</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{selectedFlow === 'clinical' ? 'Sistema Clínico' : 'Sistema Administrativo'}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{flow === 'clinical' ? 'Sistema Clínico' : 'Sistema Administrativo'}</p>
             </div>
           </div>
           <SidebarTrigger>
